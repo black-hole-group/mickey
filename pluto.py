@@ -67,80 +67,64 @@ class Pluto:
 	def __init__(self, i=0):
 		d=pp.pload(i)
 		
-		self.x1,self.x2,self.x3=d.x1,d.x2,d.x3
-		self.dx1,self.dx2,self.dx3=d.dx1,d.dx2,d.
-		self.v1,self.v2,self.v3=d.vx1,d.vx2,d.vx3
+		if d.n1>1: self.x1,self.v1,self.n1=d.x1,d.v1,d.n1
+		if d.n2>1: self.x2,self.v2,self.n2=d.x2,d.v2,d.n2
+		if d.n3>1: self.x3,self.v3,self.n3=d.x3,d.v3,d.n3
+
 		self.p=d.prs
 		self.rho=d.rho
-		self.n1,self.n2,self.n3=d.n1,d.n2,d.n3
 
-		self.speed = numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + )
-		lw = 5*speed/speed.max()	
 	
 
 
-def polar2cartesian(r, t, grid, x, y, order=3):
-	"""
-http://stackoverflow.com/questions/2164570/reprojecting-polar-to-cartesian-grid
-	"""
-	from scipy.interpolate import interp1d
-	from scipy.ndimage import map_coordinates
-	
-	return map_coordinates(grid, numpy.array([r, t]),
-		order=order).reshape(r.shape)
-
-
-
-
-
-def snapPolar(i):
-	"""
+	def snapPolar(i):
+		"""
 Creates snapshot of 2D simulation generated in polar coordinates.
 
 >>> snapPolar(10)
-	"""
-	import seaborn
-	seaborn.set_style({"axes.grid": False})
-	cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
+		"""
+		import seaborn
+		seaborn.set_style({"axes.grid": False})
+		cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
 
-	#x=range(0,nx)
-	#X,Y=numpy.meshgrid(x,x)
-	r,t=x1,x2
-	x, y = pol2cart(r,t)   
-	im=polar2cartesian(r, t, rho, x, y, order=0)
+		#x=range(0,nx)
+		#X,Y=numpy.meshgrid(x,x)
+		r,t=x1,x2
+		x, y = pol2cart(r,t)   
+		im=polar2cartesian(r, t, rho, x, y, order=0)
 
-	pylab.clf()
-	pylab.xlim(0,n1)
-	pylab.ylim(0,n2)
-	pylab.imshow(im, cmap=cmap)
-	pylab.colorbar()
-	#streamplot(X,Y,v2,v1,color='k',linewidth=lw)
-	#streamplot(X,Y,v2,v1,color='k')
-	pylab.savefig('plot.'+str(i)+'.jpeg')
-
-
+		pylab.clf()
+		pylab.xlim(0,n1)
+		pylab.ylim(0,n2)
+		pylab.imshow(im, cmap=cmap)
+		pylab.colorbar()
+		#streamplot(X,Y,v2,v1,color='k',linewidth=lw)
+		#streamplot(X,Y,v2,v1,color='k')
+		pylab.savefig('plot.'+str(i)+'.jpeg')
 
 
 
 
 
-def snap(i):
-    """
+
+
+	def snap(i):
+	    """
 Creates snapshot of 2D simulation generated in cartesian coordinates.
 
 >>> snapPolar(10)
-    """
-    import seaborn
-    seaborn.set_style({"axes.grid": False})
-    cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
-
-    d=pp.pload(i)
-    x1,x2=d.x1,d.x2
-    dx1,dx2=d.dx1,d.dx2
-    v1,v2=d.vx1,d.vx2
-    p=d.prs
-    rho=d.rho
-    nx=d.n1
+	    """
+	    import seaborn
+	    seaborn.set_style({"axes.grid": False})
+	    cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
+	
+	    d=pp.pload(i)
+	    x1,x2=d.x1,d.x2
+	    dx1,dx2=d.dx1,d.dx2
+	    v1,v2=d.vx1,d.vx2
+	    p=d.prs
+	    rho=d.rho
+	    nx=d.n1
     
     speed = numpy.sqrt(v1*v1 + v2*v2)
     lw = 5*speed/speed.max()
