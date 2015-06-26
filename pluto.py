@@ -67,81 +67,46 @@ class Pluto:
 	def __init__(self, i=0):
 		d=pp.pload(i)
 		
-		if d.n1>1: self.x1,self.v1,self.n1=d.x1,d.v1,d.n1
-		if d.n2>1: self.x2,self.v2,self.n2=d.x2,d.v2,d.n2
-		if d.n3>1: self.x3,self.v3,self.n3=d.x3,d.v3,d.n3
+		if d.n1>1: 
+			self.x1,self.v1,self.n1=d.x1,d.vx1,d.n1
+			self.speed=numpy.sqrt(self.v1*self.v1)
+		if d.n2>1: 
+			self.x2,self.v2,self.n2=d.x2,d.vx2,d.n2
+			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
+		if d.n3>1: 
+			self.x3,self.v3,self.n3=d.x3,d.vx3,d.n3
+			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
 		self.p=d.prs
 		self.rho=d.rho
+		self.frame=i
 
 	
 
-
-	def snapPolar(i):
+	def snap(self):
 		"""
-Creates snapshot of 2D simulation generated in polar coordinates.
+Creates snapshot of 2D simulation generated in cartesian coordinates.
 
->>> snapPolar(10)
+>>> snap(10)
 		"""
 		import seaborn
 		seaborn.set_style({"axes.grid": False})
 		cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
 
-		#x=range(0,nx)
-		#X,Y=numpy.meshgrid(x,x)
-		r,t=x1,x2
-		x, y = pol2cart(r,t)   
-		im=polar2cartesian(r, t, rho, x, y, order=0)
-
+		lw = 5*self.speed/self.speed.max()
+    
+		x=range(0,self.n1)
+		X,Y=numpy.meshgrid(x,x)
+    
 		pylab.clf()
-		pylab.xlim(0,n1)
-		pylab.ylim(0,n2)
-		pylab.imshow(im, cmap=cmap)
+		pylab.xlim(0,self.n1)
+		pylab.ylim(0,self.n2)
+		pylab.imshow(self.rho, cmap=cmap)
 		pylab.colorbar()
 		#streamplot(X,Y,v2,v1,color='k',linewidth=lw)
 		#streamplot(X,Y,v2,v1,color='k')
-		pylab.savefig('plot.'+str(i)+'.jpeg')
+		pylab.savefig('plot.'+str(self.frame)+'.jpeg')
 
-
-
-
-
-
-
-	def snap(i):
-	    """
-Creates snapshot of 2D simulation generated in cartesian coordinates.
-
->>> snapPolar(10)
-	    """
-	    import seaborn
-	    seaborn.set_style({"axes.grid": False})
-	    cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
-	
-	    d=pp.pload(i)
-	    x1,x2=d.x1,d.x2
-	    dx1,dx2=d.dx1,d.dx2
-	    v1,v2=d.vx1,d.vx2
-	    p=d.prs
-	    rho=d.rho
-	    nx=d.n1
-    
-    speed = numpy.sqrt(v1*v1 + v2*v2)
-    lw = 5*speed/speed.max()
-    
-    x=range(0,nx)
-    X,Y=numpy.meshgrid(x,x)
-    
-    pylab.clf()
-    pylab.xlim(0,nx)
-    pylab.ylim(0,nx)
-    pylab.imshow(rho, cmap=cmap)
-    pylab.colorbar()
-    #streamplot(X,Y,v2,v1,color='k',linewidth=lw)
-    #streamplot(X,Y,v2,v1,color='k')
-    pylab.savefig('plot.'+str(i)+'.jpeg')
-
-    return d
 
 
 
