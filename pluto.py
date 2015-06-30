@@ -85,15 +85,18 @@ class Pluto:
 		self.rho=d.rho
 		self.pp=d # pypluto object
 		self.frame=i
-		#self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.speed
+		# this is probably incorrect
+		self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.v1
 
 	
 
-	def snap(self):
+	def snap(self,var=None):
 		"""
 Creates snapshot of 2D simulation generated in cartesian coordinates.
+If 'var' is not specified, plots density field.
 
->>> snap(10)
+>>> p=pluto.Pluto(10)
+>>> p.snap(10,p.p)
 		"""
 		import seaborn
 		seaborn.set_style({"axes.grid": False})
@@ -101,13 +104,15 @@ Creates snapshot of 2D simulation generated in cartesian coordinates.
 
 		lw = 5*self.speed/self.speed.max()
     
-		x=range(0,self.n1)
-		X,Y=numpy.meshgrid(x,x)
+		#x=range(0,self.n1)
+		#X,Y=numpy.meshgrid(x,x)
     
 		pylab.clf()
-		pylab.xlim(0,self.n1)
-		pylab.ylim(0,self.n2)
-		pylab.imshow(self.rho, cmap=cmap)
+		# transposes the array because imshow is weird
+		if var==None:
+			pylab.imshow(self.rho.T, cmap=cmap, extent=[self.x1[0],self.x1[-1],self.x2[0],self.x2[-1]])
+		else:
+			pylab.imshow(var.T, cmap=cmap, extent=[self.x1[0],self.x1[-1],self.x2[0],self.x2[-1]])	
 		pylab.colorbar()
 		#streamplot(X,Y,v2,v1,color='k',linewidth=lw)
 		#streamplot(X,Y,v2,v1,color='k')
