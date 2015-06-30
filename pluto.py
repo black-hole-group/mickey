@@ -28,7 +28,7 @@ def movie(fname="movie.avi"):
 	# Progress bar initialization
 	peixe = fish.ProgressFish(total=nfiles)
 	
-	# put here to command to create the snapshots
+	# snapshot creation
 	for i in range(0,nfiles-1):
 		#cutplane(i)
 		volume(i)
@@ -67,19 +67,25 @@ class Pluto:
 	def __init__(self, i=0):
 		d=pp.pload(i)
 		
+		# when getting xi below, assumes uniform grid
 		if d.n1>1: 
-			self.x1,self.v1,self.n1=d.x1,d.vx1,d.n1
+			self.x1=numpy.linspace(d.dx1[0],d.dx1[-1],d.n1)
+			self.v1,self.n1=d.vx1,d.n1
 			self.speed=numpy.sqrt(self.v1*self.v1)
 		if d.n2>1: 
-			self.x2,self.v2,self.n2=d.x2,d.vx2,d.n2
+			self.x2=numpy.linspace(d.dx2[0],d.dx2[-1],d.n2)
+			self.v2,self.n2=d.vx2,d.n2
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
 		if d.n3>1: 
-			self.x3,self.v3,self.n3=d.x3,d.vx3,d.n3
+			self.x3=numpy.linspace(d.dx3[0],d.dx3[-1],d.n3)
+			self.v3,self.n3=d.vx3,d.n3
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
 		self.p=d.prs
 		self.rho=d.rho
+		self.pp=d # pypluto object
 		self.frame=i
+		#self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.speed
 
 	
 

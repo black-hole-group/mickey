@@ -2,7 +2,7 @@
 # 
 # Creates movie file based on sequential images.
 #
-# Usage: mencoder.sh <fps> <output file name>
+# Usage: mencoder.sh <fps> <output file basename>
 # 	e.g. mencoder.sh 5 movie
 
 bitrate=900
