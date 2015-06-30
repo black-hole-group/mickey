@@ -6,6 +6,7 @@ Methods to read and visualize PLUTO's output.
 import pyPLUTO as pp
 import mayavi.mlab as mlab
 import pylab, numpy
+import nemmen
 
 
 
@@ -118,6 +119,41 @@ If 'var' is not specified, plots density field.
 		#streamplot(X,Y,v2,v1,color='k')
 		pylab.savefig('plot.'+str(self.frame)+'.jpeg')
 
+
+	def pol2cart(self, n=200):
+		"""
+Creates a new object with variables in cartesian coordinates.
+Useful if the object was created by PLUTO in polar coordinates.
+
+n is the new number of elements n^2.
+		"""
+		# creates copy of current object which will have the new
+		# coordinates
+		obj=Pluto(self.frame)
+	
+		# r, theta
+		r,th=self.x1,self.x2
+
+		xnew=numpy.linspace(-r.max(), r.max(), n)
+		ynew=xnew.copy()	
+		rho=numpy.zeros((n,n))	
+		p=rho.copy()
+		
+		# goes through new array
+		# I am sure this can severely sped up
+		for i in range(xnew.size):
+		    for j in range(ynew.size):
+        		rnew,thnew=nemmen.cart2pol(xnew[i],ynew[j])
+        		# position in old array
+        		iref=nemmen.search(rnew, r)
+        		jref=nemmen.search(thnew, th)
+        		rho[i,j]=self.rho[iref,jref]		
+        		p[i,j]=self.p[iref,jref]	
+	
+		obj.x1,obj.x2=xnew,ynew
+		obj.rho,obj.p=rho,p
+		
+		return obj	
 
 
 
