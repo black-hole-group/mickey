@@ -42,4 +42,18 @@ or
 pluto.Pluto(50).pol2cart(400).snap()
 ```
 
+#### Generate a movie of a simulation
+
+You need to generate the image files of each frame.  For example, one quick and dirty way of doing that is to edit the *pluto.movie* method and customize what specific variable or rendering of the simulation you want to animate in the loop. 
+
+In the directory with the image files (e.g. plot.0001.jpeg, plot.0002.jpeg etc) then run:
+
+```shell
+sh PATH/mencoder.sh 5 movie
+```
+
+This will create two movie files -- movie.avi and movie.mov (OS X compatible) -- at 5 frames/second. 
+
+*mencoder.sh* has two dependencies: mencoder and ffmpeg.
+
 #### More examples coming soon.

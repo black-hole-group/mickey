@@ -177,14 +177,16 @@ class Pluto:
 		self.pp=d # pypluto object
 		self.frame=i
 		# this is probably incorrect
-		self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.v1
+		#self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.v1
 
 	
 
-	def snap(self,var=None):
+	def snap(self,var=None,hor=None):
 		"""
 Creates snapshot of 2D simulation generated in cartesian coordinates.
-If 'var' is not specified, plots density field.
+
+:param var: variable to be plotted. If not specified, assumes rho
+:param hor: plots circle at inner boundary radius with radius=hor. If None, no circle
 
 >>> p=pluto.Pluto(10)
 >>> p.snap(10,p.p)
@@ -204,6 +206,9 @@ If 'var' is not specified, plots density field.
 			pylab.imshow(self.rho.T, cmap=cmap, extent=[self.x1[0],self.x1[-1],self.x2[0],self.x2[-1]])
 		else:
 			pylab.imshow(var.T, cmap=cmap, extent=[self.x1[0],self.x1[-1],self.x2[0],self.x2[-1]])	
+		if hor!=None:  
+			circle=pylab.Circle((0,0),hor,color='b')
+			pylab.gca().add_artist(circle)
 		pylab.colorbar()
 		#streamplot(X,Y,v2,v1,color='k',linewidth=lw)
 		#streamplot(X,Y,v2,v1,color='k')
