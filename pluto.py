@@ -40,6 +40,51 @@ def movie(fname="movie.avi"):
 
 
 
+def search(xref, x):
+	"""
+Search for the element in an array x with the value nearest xref.
+Piece of code based on http://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
+
+>>> i=search(xref, x)
+
+:param xref: input number, array or list of reference values
+:param x: input array
+:returns: index of the x-elements with values nearest to xref:
+	"""
+	if numpy.size(xref)==1:
+		i=(numpy.abs(x-xref)).argmin()
+	else:
+		i=[]
+
+		for y in xref:
+			i.append( (numpy.abs(x-y)).argmin() )
+	        
+	return i
+
+
+def pol2cart(r, phi):
+	"""
+Converts from polar to cartesian coordinates.
+
+>>> x,y=pol2cart(r,phi)
+	"""
+	x = r * numpy.cos(phi)
+	y = r * numpy.sin(phi)
+	return x, y
+    
+
+def cart2pol(x, y):
+	"""
+Converts from cartesian to polar coordinates.
+
+>>> r,t=cart2pol(x,y)
+	"""
+	r = numpy.sqrt(x**2 + y**2)
+	t = numpy.arctan2(y, x)
+	return r, t
+
+
+
 
 
 
@@ -243,10 +288,10 @@ n is the new number of elements n^2.
 		# I am sure this can severely sped up
 		for i in range(xnew.size):
 		    for j in range(ynew.size):
-        		rnew,thnew=nemmen.cart2pol(xnew[i],ynew[j])
+        		rnew,thnew=cart2pol(xnew[i],ynew[j])
         		# position in old array
-        		iref=nemmen.search(rnew, r)
-        		jref=nemmen.search(thnew, th)
+        		iref=search(rnew, r)
+        		jref=search(thnew, th)
         		rho[i,j]=self.rho[iref,jref]		
         		p[i,j]=self.p[iref,jref]	
 	
