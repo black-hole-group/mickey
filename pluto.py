@@ -5,7 +5,6 @@ Methods to read and visualize PLUTO's output.
 
 import pyPLUTO as pp
 import pylab, numpy
-import nemmen
 
 
 
