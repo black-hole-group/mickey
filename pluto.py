@@ -32,6 +32,7 @@ def movie(fname="movie.avi"):
 	peixe = fish.ProgressFish(total=nfiles)
 	
 	# snapshot creation
+	# this loop is easily parallelizable 
 	for i in range(0,nfiles-1):
 		#cutplane(i)
 		volume(i)
