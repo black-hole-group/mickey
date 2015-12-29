@@ -5,7 +5,6 @@ Methods to read and visualize PLUTO's output.
 
 import pyPLUTO as pp
 import pylab, numpy
-import nemmen
 
 
 
@@ -219,7 +218,9 @@ class Pluto:
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
 		self.p=d.prs
+		self.p_grad = numpy.gradient(d.prs)
 		self.rho=d.rho
+		self.rho_grad = numpy.gradient(d.rho)
 		self.pp=d # pypluto object
 		self.frame=i
 		# this is probably incorrect
