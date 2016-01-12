@@ -203,28 +203,35 @@ class Pluto:
 	def __init__(self, i=0):
 		d=pp.pload(i)
 		
-		# when getting xi below, assumes uniform grid
+		# mesh,  and velocities
 		if d.n1>1: 
-			self.x1=numpy.linspace(d.dx1[0],d.dx1[-1],d.n1)
-			self.v1,self.n1=d.vx1,d.n1
+			self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.x1
 			self.speed=numpy.sqrt(self.v1*self.v1)
 		if d.n2>1: 
-			self.x2=numpy.linspace(d.dx2[0],d.dx2[-1],d.n2)
-			self.v2,self.n2=d.vx2,d.n2
+			self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.x2
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
 		if d.n3>1: 
-			self.x3=numpy.linspace(d.dx3[0],d.dx3[-1],d.n3)
-			self.v3,self.n3=d.vx3,d.n3
+			self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.x3
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
+		# pressure
 		self.p=d.prs
 		self.p_grad = numpy.gradient(d.prs)
-		self.rho=d.rho
+		# volume density
+		self.rho=d.rho 
 		self.rho_grad = numpy.gradient(d.rho)
+		# time
+		self.t=d.simtime
+
+		# misc. info
 		self.pp=d # pypluto object
 		self.frame=i
-		# this is probably incorrect
-		#self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.v1
+		self.vars=d.vars
+		self.geometry=d.geometry
+
+		# sound speed
+		# mach number
+		# accretion rates
 
 	
 
