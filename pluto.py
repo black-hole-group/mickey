@@ -234,51 +234,32 @@ class Pluto:
 		# accretion rates
 
 
-	def soundspeed():
+	def soundspeed(self):
 		"""
-	Compute cs=dP/drho which is valid for a general EoS.
-		"""
-		import scipy.misc
-		
-		#must define P=P(rho)
-		#given a rho
-		#finds element in rho which is the closest match
-		#then finds corresponding P
+	Compute cs=sqrt(dP/drho) which is valid for a general EoS.
 
+	1. Uses the data itself to find out P(rho)
+	2. Removes repeated values and do a cubic spline interpolation of P(rho)
+	3. Gets the derivative dP/drho
+		"""
+		# P=P(rho), i.e. gives you the pressure as a function of density.
+		# but first: NEED TO DISCARD REPEATED VALUES in P and rho
+		rho=[]	# unique values of rho
+		p=[]	# unique corresponding values of P 
+		# x and y below = rho and P from the sim, respectively
+		for i,x in enumerate(self.rho.flatten()):
+		  	if x not in rho:
+				rho.append(x)
+				p.append(self.p.flatten()[i])
 
-	def prho(self,rho):
-		"""
-	P=P(rho), i.e. gives you the pressure as a function of density.
-	This is used to compute a general sound speed valid even when
-	you are not using an ideal EoS.
-		"""
-		# creates interpolated arrays for P and rho w/ higher definition
+		rho,p=numpy.array(rho),numpy.array(p)
+		self.rhot=rho
+		self.pt=p
+
+		# creates interpolated arrays for P and rho
 		import scipy.interpolate
-
-		#x,y = numpy.meshgrid(self.x1,self.x2)
-
-		# convenient defitions of functions
-		frho=scipy.interpolate.RectBivariateSpline(self.x1,self.x2,self.rho)
-		fp=scipy.interpolate.RectBivariateSpline(self.x1,self.x2,self.p)
-		#frho=scipy.interpolate.interp2d(x,y,self.rho,kind='cubic')
-		#fp=scipy.interpolate.interp2d(x,y,self.p,kind='cubic')
-
-
-		# new arrays with 10x the number of elements
-		Xnew = numpy.linspace(self.x1[0],self.x1[-1],10*self.x1.size)
-		Ynew = numpy.linspace(self.x2[0],self.x2[-1],10*self.x2.size)
-
-		# interpolated arrays w/ higher definition
-		self.newrho=frho(Xnew,Ynew)
-		self.newp=fp(Xnew,Ynew)
-
-
-
-
-		# given a rho
-		# finds element in rho which is the closest match
-		#then finds corresponding P
-
+		self.pfun = scipy.interpolate.splrep(rho, p)
+		
 
 
 	#def mdot():
