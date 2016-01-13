@@ -178,6 +178,15 @@ i : index corresponding to frame you want to plot
 
 
 
+
+
+
+
+
+
+
+
+
 class Pluto:
 	"""
 	Class that defines data objects imported from PLUTO.
@@ -201,7 +210,7 @@ class Pluto:
 	>>> p.snap()
 	"""
 		
-	def __init__(self, i=0,*arg,**args):
+	def __init__(self, i=0,gamma=1.66666,*arg,**args):
 		d=pp.pload(i,*arg,**args)
 		
 		# mesh,  and velocities
@@ -225,17 +234,39 @@ class Pluto:
 		self.t=d.SimTime
 
 		# misc. info
-		self.pp=d # pypluto object
+		self.pp =d # pypluto object
 		self.frame=i
 		self.vars=d.vars
 		self.geometry=d.geometry
 
 		# sound speed
+		self.getgamma() # gets value of adiabatic index
+		self.soundspeed() # computes numerical cs (no need to specify EoS)
+		self.cs=numpy.sqrt(self.gamma*self.p/self.rho)
+
 		# mach number
 		# accretion rates
 
 
-	def soundspeed(self):
+	def getgamma(self):
+		"""
+	Gets value of gamma from "pluto.ini".
+		"""
+		try:
+			f = open("pluto.ini","r")
+		except IOError as e: 
+			print e
+
+		for line in f:
+		    if 'GAMMA' in line:
+		       	s=line.split() # splits string divided by whitespaces
+		       	self.gamma=float(s[1])
+		            	
+
+
+
+
+	def soundspeed(self,smooth=None):
 		"""
 	Compute cs=sqrt(dP/drho) which is valid for a general EoS.
 
@@ -251,31 +282,29 @@ class Pluto:
 		rho=[]	# unique values of rho
 		p=[]	# unique corresponding values of P 
 		# orders arrays of simulation (which have repeated values)
-		t=self.rho.flatten()
-		i=nemmen.sortindex(t)
-		rhosim=t[i]
-		t=self.p.flatten()
-		i=nemmen.sortindex(t)
-		psim=t[i]
+		i=nemmen.sortindex(self.rho.flatten())
+		rhosim=self.rho.flatten()[i]
+		psim=self.p.flatten()[i]
 		# after this loop, you will get arrays with unique elements
-		for i,x in enumerate(rhosim):
+		for j,x in enumerate(rhosim):
 		  	if x not in rho:
 				rho.append(x)
-				p.append(psim[i])
-
-		rho,p=numpy.array(rho),numpy.array(p)
+				p.append(psim[j])
 
 		# creates interpolated arrays for P and rho
+		# cf. http://docs.scipy.org/doc/scipy/reference/tutorial/interpolate.html#spline-interpolation-in-1-d-procedural-interpolate-splxxx
 		import scipy.interpolate
-		pfun = scipy.interpolate.splrep(rho, p, k=1)	# linear
+		if smooth==None:
+			pfun = scipy.interpolate.splrep(rho, p)
+		else:
+			pfun = scipy.interpolate.splrep(rho, p,s=smooth)
 
 		# calculates dP/drho in the same grid as the sim
 		pdiff=scipy.interpolate.splev(self.rho,pfun,der=1)
 
 		# sound speed
-		self.cs=numpy.sqrt(pdiff)
+		self.csnum=numpy.sqrt(pdiff)
 
-		
 
 
 	#def mdot():
