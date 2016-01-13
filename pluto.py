@@ -200,8 +200,8 @@ class Pluto:
 	>>> p.snap()
 	"""
 		
-	def __init__(self, i=0):
-		d=pp.pload(i)
+	def __init__(self, i=0,*arg,**args):
+		d=pp.pload(i,*arg,**args)
 		
 		# mesh,  and velocities
 		if d.n1>1: 
@@ -221,7 +221,7 @@ class Pluto:
 		self.rho=d.rho 
 		self.rho_grad = numpy.gradient(d.rho)
 		# time
-		self.t=d.simtime
+		self.t=d.SimTime
 
 		# misc. info
 		self.pp=d # pypluto object
