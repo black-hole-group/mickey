@@ -233,6 +233,61 @@ class Pluto:
 		# mach number
 		# accretion rates
 
+
+	def soundspeed():
+		"""
+	Compute cs=dP/drho which is valid for a general EoS.
+		"""
+		import scipy.misc
+		
+		#must define P=P(rho)
+		#given a rho
+		#finds element in rho which is the closest match
+		#then finds corresponding P
+
+
+	def prho(self,rho):
+		"""
+	P=P(rho), i.e. gives you the pressure as a function of density.
+	This is used to compute a general sound speed valid even when
+	you are not using an ideal EoS.
+		"""
+		# creates interpolated arrays for P and rho w/ higher definition
+		import scipy.interpolate
+
+		#x,y = numpy.meshgrid(self.x1,self.x2)
+
+		# convenient defitions of functions
+		frho=scipy.interpolate.RectBivariateSpline(self.x1,self.x2,self.rho)
+		fp=scipy.interpolate.RectBivariateSpline(self.x1,self.x2,self.p)
+		#frho=scipy.interpolate.interp2d(x,y,self.rho,kind='cubic')
+		#fp=scipy.interpolate.interp2d(x,y,self.p,kind='cubic')
+
+
+		# new arrays with 10x the number of elements
+		Xnew = numpy.linspace(self.x1[0],self.x1[-1],10*self.x1.size)
+		Ynew = numpy.linspace(self.x2[0],self.x2[-1],10*self.x2.size)
+
+		# interpolated arrays w/ higher definition
+		self.newrho=frho(Xnew,Ynew)
+		self.newp=fp(Xnew,Ynew)
+
+
+
+
+		# given a rho
+		# finds element in rho which is the closest match
+		#then finds corresponding P
+
+
+
+	#def mdot():
+	# compute mass accretion rate valid for any accretion flow, 
+	# not necessarily a Bondi one
+
+
+	#def Mach()
+	# compute mach number for a given velocity array
 	
 
 	def snap(self,var=None,hor=None):
