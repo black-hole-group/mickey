@@ -5,6 +5,7 @@ Methods to read and visualize PLUTO's output.
 
 import pyPLUTO as pp
 import pylab, numpy
+import nemmen
 
 
 
@@ -239,26 +240,41 @@ class Pluto:
 	Compute cs=sqrt(dP/drho) which is valid for a general EoS.
 
 	1. Uses the data itself to find out P(rho)
-	2. Removes repeated values and do a cubic spline interpolation of P(rho)
+	2. Removes repeated values and does a linear interpolation of P(rho)
 	3. Gets the derivative dP/drho
+	4. Computes the cs array
 		"""
-		# P=P(rho), i.e. gives you the pressure as a function of density.
+		# P=P(rho), 
+		# i.e. gives you the pressure as a function of density
+		# =====================
 		# but first: NEED TO DISCARD REPEATED VALUES in P and rho
 		rho=[]	# unique values of rho
 		p=[]	# unique corresponding values of P 
-		# x and y below = rho and P from the sim, respectively
-		for i,x in enumerate(self.rho.flatten()):
+		# orders arrays of simulation (which have repeated values)
+		t=self.rho.flatten()
+		i=nemmen.sortindex(t)
+		rhosim=t[i]
+		t=self.p.flatten()
+		i=nemmen.sortindex(t)
+		psim=t[i]
+		# after this loop, you will get arrays with unique elements
+		for i,x in enumerate(rhosim):
 		  	if x not in rho:
 				rho.append(x)
-				p.append(self.p.flatten()[i])
+				p.append(psim[i])
 
 		rho,p=numpy.array(rho),numpy.array(p)
-		self.rhot=rho
-		self.pt=p
 
 		# creates interpolated arrays for P and rho
 		import scipy.interpolate
-		self.pfun = scipy.interpolate.splrep(rho, p)
+		pfun = scipy.interpolate.splrep(rho, p, k=1)	# linear
+
+		# calculates dP/drho in the same grid as the sim
+		pdiff=scipy.interpolate.splev(self.rho,pfun,der=1)
+
+		# sound speed
+		self.cs=numpy.sqrt(pdiff)
+
 		
 
 
