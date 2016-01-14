@@ -215,13 +215,13 @@ class Pluto:
 		
 		# mesh,  and velocities
 		if d.n1>1: 
-			self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.x1
+			self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.dx1
 			self.speed=numpy.sqrt(self.v1*self.v1)
 		if d.n2>1: 
-			self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.x2
+			self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.dx2
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
 		if d.n3>1: 
-			self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.x3
+			self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
 			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
 		# pressure
@@ -241,10 +241,15 @@ class Pluto:
 
 		# sound speed
 		self.getgamma() # gets value of adiabatic index
-		self.soundspeed() # computes numerical cs (no need to specify EoS)
+		#self.soundspeed() # computes numerical cs (no need to specify EoS)
 		self.cs=numpy.sqrt(self.gamma*self.p/self.rho)
 
 		# mach number
+		if d.n1>1: self.mach1=self.v1/self.cs
+		if d.n2>1: self.mach2=self.v2/self.cs
+		if d.n3>1: self.mach3=self.v3/self.cs
+		self.mach=self.speed/self.cs
+
 		# accretion rates
 
 
