@@ -251,6 +251,7 @@ class Pluto:
 		self.mach=self.speed/self.cs
 
 		# accretion rates
+		self.getmdot()	# => self.mdot
 
 
 	def getgamma(self):
@@ -312,13 +313,19 @@ class Pluto:
 
 
 
-	#def mdot():
-	# compute mass accretion rate valid for any accretion flow, 
-	# not necessarily a Bondi one
+	def getmdot(self):
+		# compute mass accretion rate valid for any accretion flow
+		# right now, this is only valid for polar 2d sims
+
+		# arrays convenient for vectorization
+		r,phi = numpy.meshgrid(self.x1,self.x2)
+		dr,dphi = numpy.meshgrid(self.dx1,self.dx2)
+
+		dmdot=2.*r.T**2*self.rho*self.v1*dphi.T
+		self.mdot=dmdot.sum(1) # sums along phi axis
 
 
-	#def Mach()
-	# compute mach number for a given velocity array
+
 	
 
 	def snap(self,var=None,hor=None):
