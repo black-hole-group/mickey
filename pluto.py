@@ -4,45 +4,45 @@ Methods to read and visualize PLUTO's output.
 
 
 import pyPLUTO as pp
-import pylab, numpy
-import nemmen
+#import pylab, numpy
+import numpy
+import matplotlib.pyplot as pylab
 
 
 
 
 def movie(fname="movie.avi"):
-	"""
-3D movie generation. 
-	"""
-	import fish
-	import os, fnmatch
-	import subprocess
+   """
+3D movie generation.
+   """
+   import fish
+   import os, fnmatch
+   import subprocess
 
-	# count the number of snapshots to create the movie
-	nfiles=0
-	for file in os.listdir('.'):
-		if fnmatch.fnmatch(file, 'plot*.jpeg'):
-			nfiles=nfiles+1	
+   # count the number of snapshots to create the movie
+   nfiles=0
+   for file in os.listdir('.'):
+      if fnmatch.fnmatch(file, 'plot*.jpeg'):
+         nfiles=nfiles+1
 
-	# creates ascii list of files
-	#cmd="ls plot.*.jpeg | sort -n -t . -k 2 > list.txt"
-	#subprocess.call(cmd.split())
+   # creates ascii list of files
+   #cmd="ls plot.*.jpeg | sort -n -t . -k 2 > list.txt"
+   #subprocess.call(cmd.split())
 
-	# Progress bar initialization
-	peixe = fish.ProgressFish(total=nfiles)
-	
-	# snapshot creation
-	# this loop is easily parallelizable 
-	for i in range(0,nfiles-1):
-		#cutplane(i)
-		volume(i)
-		#snap(i)
-		peixe.animate(amount=i)
+   # Progress bar initialization
+   peixe = fish.ProgressFish(total=nfiles)
+
+   # snapshot creation
+   for i in range(0,nfiles-1):
+      #cutplane(i)
+      volume(i)
+      #snap(i)
+      peixe.animate(amount=i)
 
 
 
 def search(xref, x):
-	"""
+   """
 Search for the element in an array x with the value nearest xref.
 Piece of code based on http://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
 
@@ -51,38 +51,38 @@ Piece of code based on http://stackoverflow.com/questions/2566412/find-nearest-v
 :param xref: input number, array or list of reference values
 :param x: input array
 :returns: index of the x-elements with values nearest to xref:
-	"""
-	if numpy.size(xref)==1:
-		i=(numpy.abs(x-xref)).argmin()
-	else:
-		i=[]
+   """
+   if numpy.size(xref)==1:
+      i=(numpy.abs(x-xref)).argmin()
+   else:
+      i=[]
 
-		for y in xref:
-			i.append( (numpy.abs(x-y)).argmin() )
-	        
-	return i
+      for y in xref:
+         i.append( (numpy.abs(x-y)).argmin() )
+
+   return i
 
 
 def pol2cart(r, phi):
-	"""
+   """
 Converts from polar to cartesian coordinates.
 
 >>> x,y=pol2cart(r,phi)
-	"""
-	x = r * numpy.cos(phi)
-	y = r * numpy.sin(phi)
-	return x, y
-    
+   """
+   x = r * numpy.cos(phi)
+   y = r * numpy.sin(phi)
+   return x, y
+
 
 def cart2pol(x, y):
-	"""
+   """
 Converts from cartesian to polar coordinates.
 
 >>> r,t=cart2pol(x,y)
-	"""
-	r = numpy.sqrt(x**2 + y**2)
-	t = numpy.arctan2(y, x)
-	return r, t
+   """
+   r = numpy.sqrt(x**2 + y**2)
+   t = numpy.arctan2(y, x)
+   return r, t
 
 
 
@@ -93,89 +93,80 @@ Converts from cartesian to polar coordinates.
 
 
 def cutplane(i):
-	"""
-Snapshot of 3d cartesian simulation, generating cut planes.	
+   """
+Snapshot of 3d cartesian simulation, generating cut planes.
 
 i : index corresponding to frame you want to plot
-	"""
-	import mayavi.mlab as mlab
+   """
+   import mayavi.mlab as mlab
 
-	d=pp.pload(i)
-	x1,x2,x3=d.x1,d.x2,d.x3
-	v1,v2,v3=d.vx1,d.vx2,d.vx3
-	p=d.prs
-	rho=d.rho
+   d=pp.pload(i)
+   x1,x2,x3=d.x1,d.x2,d.x3
+   v1,v2,v3=d.vx1,d.vx2,d.vx3
+   p=d.prs
+   rho=d.rho
 
-	mlab.clf()
-	#mlab.figure(size=(600,600))
+   mlab.clf()
+   #mlab.figure(size=(600,600))
 
-	# volume rendering
-	mp=mlab.pipeline.scalar_field(p)
-	mrho=mlab.pipeline.scalar_field(rho)
-	#mlab.pipeline.volume(mp)#,vmax=rho.max()/5.)
+   # volume rendering
+   mp=mlab.pipeline.scalar_field(p)
+   mrho=mlab.pipeline.scalar_field(rho)
+   #mlab.pipeline.volume(mp)#,vmax=rho.max()/5.)
 
-	# streamlines
-	#flow = mlab.flow(v1, v2, v3, seed_scale=0.5, seed_resolution=8, integration_direction='both',seed_visible=False)
+   # streamlines
+   #flow = mlab.flow(v1, v2, v3, seed_scale=0.5, seed_resolution=8, integration_direction='both',seed_visible=False)
 
-	# cut planes
-	mlab.pipeline.image_plane_widget(mp, plane_orientation='y_axes', slice_index=100)
-	mlab.pipeline.image_plane_widget(mp, plane_orientation='x_axes', slice_index=100)
+   # cut planes
+   mlab.pipeline.image_plane_widget(mp, plane_orientation='y_axes', slice_index=100)
+   mlab.pipeline.image_plane_widget(mp, plane_orientation='x_axes', slice_index=100)
 
-	# move camera to appropriate distance
-	dcam=mlab.view()[2] # distance of camera to center
-	##mlab.move(forward=dcam/2.)
-	mlab.view(distance=dcam/2.)
+   # move camera to appropriate distance
+   dcam=mlab.view()[2] # distance of camera to center
+   ##mlab.move(forward=dcam/2.)
+   mlab.view(distance=dcam/2.)
 
-	# saves snapshot
-	mlab.savefig('plot.'+str(i)+'.jpeg',size=(800,800))
+   # saves snapshot
+   mlab.savefig('plot.'+str(i)+'.jpeg',size=(800,800))
 
 
 
 
 def volume(i):
-	"""
-Volume rendering of 3d cartesian simulation.	
-	
+   """
+Volume rendering of 3d cartesian simulation.
+
 i : index corresponding to frame you want to plot
-	"""
-	import mayavi.mlab as mlab
+   """
+   import mayavi.mlab as mlab
 
-	d=pp.pload(i)
-	x1,x2,x3=d.x1,d.x2,d.x3
-	v1,v2,v3=d.vx1,d.vx2,d.vx3
-	p=d.prs
-	rho=d.rho
+   d=pp.pload(i)
+   x1,x2,x3=d.x1,d.x2,d.x3
+   v1,v2,v3=d.vx1,d.vx2,d.vx3
+   p=d.prs
+   rho=d.rho
 
-	mlab.clf()
+   mlab.clf()
 
-	# volume rendering
-	mp=mlab.pipeline.scalar_field(p)
-	mrho=mlab.pipeline.scalar_field(rho)
-	mlab.pipeline.volume(mp)#,vmax=rho.max()/5.)
+   # volume rendering
+   mp=mlab.pipeline.scalar_field(p)
+   mrho=mlab.pipeline.scalar_field(rho)
+   mlab.pipeline.volume(mp)#,vmax=rho.max()/5.)
 
-	# streamlines
-	#flow = mlab.flow(v1, v2, v3, seed_scale=0.5, seed_resolution=8, integration_direction='both',seed_visible=False)
+   # streamlines
+   #flow = mlab.flow(v1, v2, v3, seed_scale=0.5, seed_resolution=8, integration_direction='both',seed_visible=False)
 
-	# cut planes
-	#mlab.pipeline.image_plane_widget(mp, plane_orientation='y_axes', slice_index=100)
-	#mlab.pipeline.image_plane_widget(mp, plane_orientation='x_axes', slice_index=100)
+   # cut planes
+   #mlab.pipeline.image_plane_widget(mp, plane_orientation='y_axes', slice_index=100)
+   #mlab.pipeline.image_plane_widget(mp, plane_orientation='x_axes', slice_index=100)
 
-	# move camera to appropriate distance
-	dcam=mlab.view()[2] # distance of camera to center
-	##mlab.move(forward=dcam/2.)
-	mlab.view(distance=dcam/2.)
+   # move camera to appropriate distance
+   dcam=mlab.view()[2] # distance of camera to center
+   ##mlab.move(forward=dcam/2.)
+   mlab.view(distance=dcam/2.)
 
-	# saves snapshot
-	mlab.savefig('plot.'+str(i)+'.jpeg',size=(800,800))
-
-
-
-
-
-
-
-
-
+   # saves snapshot
+   mlab.savefig('plot.'+str(i)+'.jpeg',size=(800,800))
 
 
 
@@ -188,182 +179,110 @@ i : index corresponding to frame you want to plot
 
 
 class Pluto:
-	"""
-	Class that defines data objects imported from PLUTO.
-	
-	The object's attributes are:
-	
-	- x1,x2,x3
-	- v1,v2,v3
-	- pressure p
-	- rho
-	- n1,n2,n3
+   """
+   Class that defines data objects imported from PLUTO.
 
-	
-	To read the simulation output for frame 10:
-	
-	>>> import pluto
-	>>> p=pluto.Pluto(10)
-	
-	Plots density field:
-	
-	>>> p.snap()
-	"""
-		
-	def __init__(self, i=0,gamma=1.66666,*arg,**args):
-		d=pp.pload(i,*arg,**args)
-		
-		# mesh,  and velocities
-		if d.n1>1: 
-			self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.dx1
-			self.speed=numpy.sqrt(self.v1*self.v1)
-		if d.n2>1: 
-			self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.dx2
-			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
-		if d.n3>1: 
-			self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
-			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
+   The object's attributes are:
 
-		# pressure
-		self.p=d.prs
-		self.p_grad = numpy.gradient(d.prs)
-		# volume density
-		self.rho=d.rho 
-		self.rho_grad = numpy.gradient(d.rho)
-		# time
-		self.t=d.SimTime
-
-		# misc. info
-		self.pp =d # pypluto object
-		self.frame=i
-		self.vars=d.vars
-		self.geometry=d.geometry
-
-		# sound speed
-		self.getgamma() # gets value of adiabatic index
-		#self.soundspeed() # computes numerical cs (no need to specify EoS)
-		self.cs=numpy.sqrt(self.gamma*self.p/self.rho)
-
-		# mach number
-		if d.n1>1: self.mach1=self.v1/self.cs
-		if d.n2>1: self.mach2=self.v2/self.cs
-		if d.n3>1: self.mach3=self.v3/self.cs
-		self.mach=self.speed/self.cs
-
-		# accretion rates
-		self.getmdot()	# => self.mdot
+   - x1,x2,x3
+   - v1,v2,v3
+   - pressure p
+   - rho
+   - n1,n2,n3
 
 
-	def getgamma(self):
-		"""
-	Gets value of gamma from "pluto.ini".
-		"""
-		try:
-			f = open("pluto.ini","r")
-		except IOError as e: 
-			print e
+   To read the simulation output for frame 10:
 
-		for line in f:
-		    if 'GAMMA' in line:
-		       	s=line.split() # splits string divided by whitespaces
-		       	self.gamma=float(s[1])
-		            	
+   >>> import pluto
+   >>> p=pluto.Pluto(10)
+
+   Plots density field:
+
+   >>> p.snap()
+   """
+
+   def __init__(self, i=0):
+      d=pp.pload(i)
+
+      # when getting xi below, assumes uniform grid
+      if d.n1>1:
+         self.x1=d.x1
+         self.v1,self.n1=d.vx1,d.n1
+         self.speed=numpy.sqrt(self.v1*self.v1)
+      if d.n2>1:
+         self.x2=d.x2
+         self.v2,self.n2=d.vx2,d.n2
+         self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
+      if d.n3>1:
+         self.x3=d.x3
+         self.v3,self.n3=d.vx3,d.n3
+         self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
+
+      self.p=d.prs
+      self.rho=d.rho
+      self.dp =  numpy.gradient(d.prs)
+      self.drho = numpy.gradient(d.rho)
+      self.pp=d # pypluto object
+      self.frame=i
+      # this is probably incorrect
+      #self.Mdot=-4.*numpy.pi*self.x1**2*self.rho*self.v1
 
 
 
+   def snap(self,n=20,lim=None,var=None,hor=None):
+      """
+Creates snapshot of 2D simulation generated in any coordinates.
 
-	def soundspeed(self,smooth=None):
-		"""
-	Compute cs=sqrt(dP/drho) which is valid for a general EoS.
-
-	1. Uses the data itself to find out P(rho)
-	2. Removes repeated values and does a linear interpolation of P(rho)
-	3. Gets the derivative dP/drho
-	4. Computes the cs array
-		"""
-		# P=P(rho), 
-		# i.e. gives you the pressure as a function of density
-		# =====================
-		# but first: NEED TO DISCARD REPEATED VALUES in P and rho
-		rho=[]	# unique values of rho
-		p=[]	# unique corresponding values of P 
-		# orders arrays of simulation (which have repeated values)
-		i=nemmen.sortindex(self.rho.flatten())
-		rhosim=self.rho.flatten()[i]
-		psim=self.p.flatten()[i]
-		# after this loop, you will get arrays with unique elements
-		for j,x in enumerate(rhosim):
-		  	if x not in rho:
-				rho.append(x)
-				p.append(psim[j])
-
-		# creates interpolated arrays for P and rho
-		# cf. http://docs.scipy.org/doc/scipy/reference/tutorial/interpolate.html#spline-interpolation-in-1-d-procedural-interpolate-splxxx
-		import scipy.interpolate
-		if smooth==None:
-			pfun = scipy.interpolate.splrep(rho, p)
-		else:
-			pfun = scipy.interpolate.splrep(rho, p,s=smooth)
-
-		# calculates dP/drho in the same grid as the sim
-		pdiff=scipy.interpolate.splev(self.rho,pfun,der=1)
-
-		# sound speed
-		self.csnum=numpy.sqrt(pdiff)
-
-
-
-	def getmdot(self):
-		# compute mass accretion rate valid for any accretion flow
-		# right now, this is only valid for polar 2d sims
-
-		# arrays convenient for vectorization
-		r,phi = numpy.meshgrid(self.x1,self.x2)
-		dr,dphi = numpy.meshgrid(self.dx1,self.dx2)
-
-		dmdot=2.*r.T**2*self.rho*self.v1*dphi.T
-		self.mdot=dmdot.sum(1) # sums along phi axis
-
-
-
-	
-
-	def snap(self,var=None,hor=None):
-		"""
-Creates snapshot of 2D simulation generated in cartesian coordinates.
-
+:param n: Number of uniform divisions in x and y for the quiver plot
+:param lim: The limits which the graph will be plotted (from -lim to lim)
 :param var: variable to be plotted. If not specified, assumes rho
 :param hor: plots circle at inner boundary radius with radius=hor. If None, no circle
 
 >>> p=pluto.Pluto(10)
 >>> p.snap(10,p.p)
-		"""
-		import seaborn
-		seaborn.set_style({"axes.grid": False})
-		cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
+      """
+#      import seaborn
+#      seaborn.set_style({"axes.grid": False})
+#      cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
 
-		lw = 5*self.speed/self.speed.max()
-    
-		#x=range(0,self.n1)
-		#X,Y=numpy.meshgrid(x,x)
-    
-		pylab.clf()
-		# transposes the array because imshow is weird
-		if var==None:
-			pylab.imshow(self.rho.T, cmap=cmap, extent=[self.x1[0],self.x1[-1],self.x2[0],self.x2[-1]])
-		else:
-			pylab.imshow(var.T, cmap=cmap, extent=[self.x1[0],self.x1[-1],self.x2[0],self.x2[-1]])	
-		if hor!=None:  
-			circle=pylab.Circle((0,0),hor,color='b')
-			pylab.gca().add_artist(circle)
-		pylab.colorbar()
-		#streamplot(X,Y,v2,v1,color='k',linewidth=lw)
-		#streamplot(X,Y,v2,v1,color='k')
-		pylab.savefig('plot.'+str(self.frame)+'.jpeg')
+      d = self.pp
+      lw = 5*self.speed/self.speed.max()
+      I = pp.Image()
+
+      #x=range(0,self.n1)
+      #X,Y=numpy.meshgrid(x,x)
+
+      pylab.clf()
+      # transposes the array because imshow is weird
+      if(d.geometry=='POLAR' or d.geometry=='SPHERICAL'):
+          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+                label1='r',label2='$\phi$',title=r'Density $\rho$ [Bondi test]',
+                cbar=(True,'vertical'),polar=[True,True],vmin=1,vmax=7.0) #polar automatic conversion =D
+          obj = self.pol2cart(n,lim)
+          pylab.title("t = %.2f" % d.SimTime)
+          pylab.quiver(obj.x1,obj.x2,obj.v2,obj.v1,color='k')
+          pylab.xlim(-lim,lim)
+          pylab.ylim(-lim,lim)
+          print "Done i= %i" % self.frame
+      else:
+         I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+                     label1='x',label2='y',lw=lw,title=r'Density $\rho$ [Bondi test]',
+                cbar=(True,'vertical'),vmin=-9,vmax=0) #polar automatic conversion =D
+         obj = self.cart(n,lim)
+         pylab.title("t = %.2f" % d.SimTime)
+         pylab.quiver(obj.x1,obj.x2,obj.v2,obj.v1,color='k')
+         pylab.xlim(self.x1.min(),2*lim)
+         pylab.ylim(-lim,lim)
+      if hor!=None:
+         circle=pylab.Circle((0,0),hor,color='b')
+         pylab.gca().add_artist(circle)
+      #pylab.streamplot(self.x1,self.x2,self.v2,self.v1,color='k')
+
+      pylab.savefig('plot.'+str(self.frame)+'.png')
 
 
-	def pol2cart(self, n=200):
-		"""
+   def pol2cart(self, n=200, xlim =None):
+      """
 Creates a new object with variables in cartesian coordinates.
 Useful if the object was created by PLUTO in polar coordinates.
 
@@ -373,34 +292,88 @@ n is the new number of elements n^2.
 >>> c=pluto.Pluto(100)
 >>> p=c.pol2cart(400) # creates new object in polar coordinates
 >>> p.snap() # plots in polar coords.
-		"""
-		# creates copy of current object which will have the new
-		# coordinates
-		obj=Pluto(self.frame)
-	
-		# r, theta
-		r,th=self.x1,self.x2
+      """
+      # creates copy of current object which will have the new
+      # coordinates
+      obj=Pluto(self.frame)
+      # r, theta
+      r,th=self.x1,self.x2
+      if(xlim == None):
+          xlim = self.x1.max()
 
-		xnew=numpy.linspace(-r.max(), r.max(), n)
-		ynew=xnew.copy()	
-		rho=numpy.zeros((n,n))	
-		p=rho.copy()
-		
-		# goes through new array
-		# I am sure this can severely sped up
-		for i in range(xnew.size):
-		    for j in range(ynew.size):
-        		rnew,thnew=cart2pol(xnew[i],ynew[j])
-        		# position in old array
-        		iref=search(rnew, r)
-        		jref=search(thnew, th)
-        		rho[i,j]=self.rho[iref,jref]		
-        		p[i,j]=self.p[iref,jref]	
-	
-		obj.x1,obj.x2=xnew,ynew
-		obj.rho,obj.p=rho,p
-		
-		return obj	
+      xnew=numpy.linspace(-xlim, xlim, n)
+      ynew=xnew.copy()
+      rho=numpy.zeros((n,n))
+      vx=numpy.zeros((n,n))
+      vy=numpy.zeros((n,n))
+      p=rho.copy()
+
+      # goes through new array
+      # I am sure this can severely sped up
+      for i in range(xnew.size):
+          for j in range(ynew.size):
+              rnew,thnew=cart2pol(xnew[i],ynew[j])
+              # position in old array
+              iref=search(rnew, r)
+              jref=search(thnew, th)
+              rho[i,j]=self.rho[iref,jref]
+              p[i,j]=self.p[iref,jref]
+              vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
+              vy[i,j]=self.v1[iref,jref] * numpy.sin(thnew)
+
+      obj.x1,obj.x2=xnew,ynew
+      obj.rho,obj.p=rho,p
+      obj.v1,obj.v2 = vx,vy
+      print obj
+
+      return obj
+
+   def cart(self, n=200, xlim =None):
+      """
+        Creates a new object with variables in cartesian coordinates.
+        Useful if the object was created by PLUTO in polar coordinates.
+
+        n is the new number of elements n^2.
+
+        >>> imshowport pluto
+        >>> c=pluto.Pluto(100)
+        >>> p=c.pol2cart(400) # creates new object in polar coordinates
+        >>> p.snap() # plots in polar coords.
+      """
+      # creates copy of current object which will have the new
+      # coordinates
+      obj=Pluto(self.frame)
+      # r, theta
+      r,th=self.x1,self.x2
+      if(xlim == None):
+          xlim = self.x1.max()
+
+      xnew=numpy.linspace(self.x1.min(), xlim*2, n)
+      ynew=numpy.linspace(-xlim, xlim, n)
+      rho=numpy.zeros((n,n))
+      vx=numpy.zeros((n,n))
+      vy=numpy.zeros((n,n))
+      p=rho.copy()
+
+      # goes through new array
+      # I am sure this can severely sped up
+      for i in range(xnew.size):
+          for j in range(ynew.size):
+              rnew,thnew=xnew[i],ynew[j]
+              # position in old array
+              iref=search(rnew, r)
+              jref=search(thnew, th)
+              rho[i,j]=self.rho[iref,jref]
+              p[i,j]=self.p[iref,jref]
+              vx[i,j]=self.v1[iref,jref]
+              vy[i,j]=self.v2[iref,jref]
+
+      obj.x1,obj.x2=xnew,ynew
+      obj.rho,obj.p=rho,p
+      obj.v1,obj.v2 = vx,vy
+
+      return obj
+
 
 
 
