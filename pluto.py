@@ -7,6 +7,7 @@ import pyPLUTO as pp
 #import pylab, numpy
 import numpy
 import matplotlib.pyplot as pylab
+from scipy import ndimage
 
 
 
@@ -81,7 +82,8 @@ Converts from cartesian to polar coordinates.
 >>> r,t=cart2pol(x,y)
    """
    r = numpy.sqrt(x**2 + y**2)
-   t = numpy.arctan2(y, x)
+   #t = numpy.arctan2(y, x)
+   t = numpy.arctan2(x, y)
    return r, t
 
 
@@ -229,7 +231,7 @@ class Pluto:
 
 
 
-   def snap(self,n=20,lim=None,var=None,hor=None):
+   def snap(self,n=20,lim=None,rhomax = 2,stream = 'n',var=None,hor=None):
       """
 Creates snapshot of 2D simulation generated in any coordinates.
 
@@ -256,21 +258,24 @@ Creates snapshot of 2D simulation generated in any coordinates.
       # transposes the array because imshow is weird
       if(d.geometry=='POLAR' or d.geometry=='SPHERICAL'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                label1='r',label2='$\phi$',title=r'Density $\rho$ [Bondi test]',
-                cbar=(True,'vertical'),polar=[True,True],vmin=1,vmax=7.0) #polar automatic conversion =D
+                label1='x',label2='y',title=r'Density $\rho$ [Bondi test]',
+                cbar=(True,'vertical'),polar=[True,True],vmin=1,vmax=rhomax) #polar automatic conversion =D
           obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % d.SimTime)
-          pylab.quiver(obj.x1,obj.x2,obj.v2,obj.v1,color='k')
+          pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
           pylab.xlim(-lim,lim)
           pylab.ylim(-lim,lim)
           print "Done i= %i" % self.frame
       else:
          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                     label1='x',label2='y',lw=lw,title=r'Density $\rho$ [Bondi test]',
-                cbar=(True,'vertical'),vmin=-9,vmax=0) #polar automatic conversion =D
+                     label1='r',label2='$\phi$',lw=lw,title=r'Density $\rho$ [Bondi test]',
+                cbar=(True,'vertical'),vmin=-6.5,vmax=0) #polar automatic conversion =D
          obj = self.cart(n,lim)
          pylab.title("t = %.2f" % d.SimTime)
-         pylab.quiver(obj.x1,obj.x2,obj.v2,obj.v1,color='k')
+         if stream == 'y':
+            pylab.streamplot(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
+         else:
+            pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
          pylab.xlim(self.x1.min(),2*lim)
          pylab.ylim(-lim,lim)
       if hor!=None:
@@ -344,37 +349,57 @@ n is the new number of elements n^2.
       # coordinates
       obj=Pluto(self.frame)
       # r, theta
-      r,th=self.x1,self.x2
+      r,z=self.x1,self.x2
       if(xlim == None):
           xlim = self.x1.max()
 
       xnew=numpy.linspace(self.x1.min(), xlim*2, n)
       ynew=numpy.linspace(-xlim, xlim, n)
-      rho=numpy.zeros((n,n))
       vx=numpy.zeros((n,n))
       vy=numpy.zeros((n,n))
-      p=rho.copy()
 
       # goes through new array
       # I am sure this can severely sped up
       for i in range(xnew.size):
           for j in range(ynew.size):
-              rnew,thnew=xnew[i],ynew[j]
               # position in old array
-              iref=search(rnew, r)
-              jref=search(thnew, th)
-              rho[i,j]=self.rho[iref,jref]
-              p[i,j]=self.p[iref,jref]
-              vx[i,j]=self.v1[iref,jref]
-              vy[i,j]=self.v2[iref,jref]
+              iref=search(xnew[i], r)
+              jref=search(ynew[j], z)
+              vx[j,i]=self.v1[iref,jref]
+              vy[j,i]=self.v2[iref,jref]
+
 
       obj.x1,obj.x2=xnew,ynew
-      obj.rho,obj.p=rho,p
       obj.v1,obj.v2 = vx,vy
 
       return obj
 
+   def cart2(self, rmax =10,ylim= 5):
+        """This doesnt work, probably due to quiver plot"""
 
+        obj=Pluto(self.frame)
+        r,z = self.x1,self.x2
+        rnew = []
+        znew = []
+        rho = []
+        vx = []
+        vy = []
+        k = 0
+
+        for i in range(r.size):
+            if(r[i] > rmax): # if r is larger, surely z doesn't matter
+                vx.append([])
+                vy.append([])
+                for j in range(z.size):
+                    if((z[j] > -ylim) and (z[j] < ylim)):
+                        rnew.append(r[i])
+                        znew.append(z[i])
+                        vx[k].append(self.v1[i,j])
+                        vy[k].append(self.v2[i,j])
+                k +=1
+        obj.x1,obj.x2=rnew,znew
+        obj.v1,obj.v2 = vx,vy
+        return obj
 
 
 
