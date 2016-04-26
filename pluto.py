@@ -419,17 +419,12 @@ n is the new number of elements n^2.
         obj.v1,obj.v2 = vx,vy
         return obj
 
+
    def plot_grid(self):
         for i in range(self.n1):
-            for j in range(self.n2):
-                if(i != 0):
-                    pylab.vlines(self.x2[j],self.x1[i-1],self.x1[i],'k',alpha=0.5)
-#                if(i != self.n1 - 1):
-#                    pylab.plot([self.x1[i],self.x1[i+1]],[self.x2[j],self.x2[j]],'k')
-                if(j != 0):
-                    pylab.hlines(self.x1[i],self.x2[j-1],self.x2[j],'k',alpha=0.5)
-#                if(j != self.n2 - 1):
-#                    pylab.plot([self.x1[i],self.x1[i]],[self.x2[j],self.x2[j+1]],'k')
+            pylab.hlines(self.x1[i],self.x2[0],self.x2[-1],'k',alpha=0.5)
+        for i in range(self.n2):
+            pylab.vlines(self.x2[j],self.x1[0],self.x1[-1],'k',alpha=0.5)
 
 
 
