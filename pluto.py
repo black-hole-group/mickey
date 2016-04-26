@@ -191,6 +191,7 @@ class Pluto:
    - pressure p
    - rho
    - n1,n2,n3
+   - bx1, bx2, bx3
 
 
    To read the simulation output for frame 10:
@@ -211,14 +212,17 @@ class Pluto:
          self.x1=d.x1
          self.v1,self.n1=d.vx1,d.n1
          self.speed=numpy.sqrt(self.v1*self.v1)
+#         self.bx1 = d.bx1
       if d.n2>1:
          self.x2=d.x2
          self.v2,self.n2=d.vx2,d.n2
          self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
+#         self.bx2 = d.bx2
       if d.n3>1:
          self.x3=d.x3
          self.v3,self.n3=d.vx3,d.n3
          self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
+         self.bx3 = d.bx3
 
       self.p=d.prs
       self.rho=d.rho
@@ -231,7 +235,7 @@ class Pluto:
 
 
 
-   def snap(self,n=20,lim=None,rhomax = 2,stream = 'n',var=None,hor=None):
+   def snap(self,n=20,lim=None,rhomax = 2,stream = 'n',mag = 'n',var=None,hor=None):
       """
 Creates snapshot of 2D simulation generated in any coordinates.
 
@@ -268,14 +272,21 @@ Creates snapshot of 2D simulation generated in any coordinates.
           print "Done i= %i" % self.frame
       else:
          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                     label1='r',label2='$\phi$',lw=lw,title=r'Density $\rho$ [Bondi test]',
+                     label1='r',label2='$\phi$',lw=lw,title=r'Density $\rho$ [Torus]',
                 cbar=(True,'vertical'),vmin=-6.5,vmax=0) #polar automatic conversion =D
          obj = self.cart(n,lim)
+         self.plot_grid()
          pylab.title("t = %.2f" % d.SimTime)
          if stream == 'y':
-            pylab.streamplot(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
+            if(mag == 'y'):
+                pylab.streamplot(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
+            else:
+                pylab.streamplot(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
          else:
-            pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
+            if(mag == 'y'):
+                pylab.quiver(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
+            else:
+                pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
          pylab.xlim(self.x1.min(),2*lim)
          pylab.ylim(-lim,lim)
       if hor!=None:
@@ -283,7 +294,9 @@ Creates snapshot of 2D simulation generated in any coordinates.
          pylab.gca().add_artist(circle)
       #pylab.streamplot(self.x1,self.x2,self.v2,self.v1,color='k')
 
+      pylab.tight_layout()
       pylab.savefig('plot.'+str(self.frame)+'.png')
+#      pylab.show()
 
 
    def pol2cart(self, n=200, xlim =None):
@@ -357,6 +370,8 @@ n is the new number of elements n^2.
       ynew=numpy.linspace(-xlim, xlim, n)
       vx=numpy.zeros((n,n))
       vy=numpy.zeros((n,n))
+      bx=numpy.zeros((n,n))
+      by=numpy.zeros((n,n))
 
       # goes through new array
       # I am sure this can severely sped up
@@ -367,10 +382,13 @@ n is the new number of elements n^2.
               jref=search(ynew[j], z)
               vx[j,i]=self.v1[iref,jref]
               vy[j,i]=self.v2[iref,jref]
+#              bx[j,i]=self.bx1[iref,jref]
+#              by[j,i]=self.bx2[iref,jref]
 
 
       obj.x1,obj.x2=xnew,ynew
       obj.v1,obj.v2 = vx,vy
+      obj.bx1,obj.bx2 = bx,by
 
       return obj
 
@@ -400,6 +418,20 @@ n is the new number of elements n^2.
         obj.x1,obj.x2=rnew,znew
         obj.v1,obj.v2 = vx,vy
         return obj
+
+   def plot_grid(self):
+        for i in range(self.n1):
+            for j in range(self.n2):
+                if(i != 0):
+                    pylab.vlines(self.x2[j],self.x1[i-1],self.x1[i],'k',alpha=0.5)
+#                if(i != self.n1 - 1):
+#                    pylab.plot([self.x1[i],self.x1[i+1]],[self.x2[j],self.x2[j]],'k')
+                if(j != 0):
+                    pylab.hlines(self.x1[i],self.x2[j-1],self.x2[j],'k',alpha=0.5)
+#                if(j != self.n2 - 1):
+#                    pylab.plot([self.x1[i],self.x1[i]],[self.x2[j],self.x2[j+1]],'k')
+
+
 
 
 
