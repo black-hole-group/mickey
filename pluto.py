@@ -235,7 +235,7 @@ class Pluto:
 
 
 
-   def snap(self,n=20,lim=None,rhomax = 2,stream = 'n',mag = 'n',var=None,hor=None):
+   def snap(self,n=20,lim=10,rhomax = 2,stream = 'n',mag = 'n',var=None,hor=None):
       """
 Creates snapshot of 2D simulation generated in any coordinates.
 
@@ -260,22 +260,33 @@ Creates snapshot of 2D simulation generated in any coordinates.
 
       pylab.clf()
       # transposes the array because imshow is weird
-      if(d.geometry=='POLAR' or d.geometry=='SPHERICAL'):
+      if(d.geometry=='POLAR'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                label1='x',label2='y',title=r'Density $\rho$ [Bondi test]',
-                cbar=(True,'vertical'),polar=[True,True],vmin=1,vmax=rhomax) #polar automatic conversion =D
-          obj = self.pol2cart(n,lim)
+                label1='R',label2='$\\phi$',title=r'Density $\rho$ ',
+                cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax) #polar automatic conversion =D
+          #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % d.SimTime)
-          pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
+          #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
           pylab.xlim(-lim,lim)
+          pylab.ylim(-lim,lim)
+          print ("Done i= %i" % self.frame)
+
+      if(d.geometry=='SPHERICAL'):
+          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+                label1='R',label2='$\\theta$',title=r'Density $\rho$ ',
+                cbar=(True,'vertical'),polar=[True,False],vmin=-9,vmax=rhomax) #polar automatic conversion =D
+          #obj = self.pol2cart(n,lim)
+          pylab.title("t = %.2f" % d.SimTime)
+          #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
+          pylab.xlim(0,lim)
           pylab.ylim(-lim,lim)
           print "Done i= %i" % self.frame
       else:
          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
                      label1='r',label2='$\phi$',lw=lw,title=r'Density $\rho$ [Torus]',
-                cbar=(True,'vertical'),vmin=-6.5,vmax=0) #polar automatic conversion =D
+                cbar=(True,'vertical'),vmin=-9,vmax=0) #polar automatic conversion =D
          obj = self.cart(n,lim)
-         self.plot_grid()
+#         self.plot_grid()
          pylab.title("t = %.2f" % d.SimTime)
          if stream == 'y':
             if(mag == 'y'):
@@ -295,7 +306,7 @@ Creates snapshot of 2D simulation generated in any coordinates.
       #pylab.streamplot(self.x1,self.x2,self.v2,self.v1,color='k')
 
       pylab.tight_layout()
-      pylab.savefig('plot.'+str(self.frame)+'.png')
+      pylab.savefig('plot.'+str(self.frame)+'.png',dpi=400)
 #      pylab.show()
 
 
@@ -422,12 +433,81 @@ n is the new number of elements n^2.
 
    def plot_grid(self):
         for i in range(self.n1):
-            pylab.hlines(self.x1[i],self.x2[0],self.x2[-1],'k',alpha=0.5)
+            pylab.vlines(self.x1[i],self.x2[0],self.x2[-1],'k',alpha=0.5)
         for i in range(self.n2):
-            pylab.vlines(self.x2[j],self.x1[0],self.x1[-1],'k',alpha=0.5)
+            pylab.hlines(self.x2[i],self.x1[0],self.x1[-1],'k',alpha=0.5)
 
-
-
-
-
-
+   def sph_analisys(self):
+        n = 4
+        thmin = (90-n) * numpy.pi / 180.
+        thmax = (90+n) * numpy.pi / 180.
+        dpi = 400
+        ######Setting vectors for plot#######
+        rhop = numpy.zeros(self.n1)
+        prsp = numpy.zeros(self.n1)
+        vphp = numpy.zeros(self.n1)
+        vradp = numpy.zeros(self.n1)
+        ######Loop time!#######
+        for i in range(self.n1):
+            rho = numpy.zeros(self.n2)
+            prs = numpy.zeros(self.n2)
+            vph = numpy.zeros(self.n2)
+            vrad = numpy.zeros(self.n2)
+            for j in range(self.n2):
+                if( self.x2[j] > thmin ):
+                    rho[j] = self.rho[i,j]
+                    prs[j] = self.p[i,j]
+                    vph[j] = self.v2[i,j]
+                    vrad[j] = self.v1[i,j]
+                    #degree test
+                    if(self.frame == 0):
+                        self.rho[i][j] = 10;
+                if(self.x2[j] > thmax):
+                    break
+            rhop[i] = numpy.sum(rho)
+            prsp[i] = numpy.sum(prs)
+            vphp[i] = numpy.sum(vph)
+            vradp[i] = numpy.sum(vrad)
+        #############
+        pylab.title("t = %.2f" % self.pp.SimTime)
+        pylab.subplot(221)
+        pylab.xlabel("Radius")
+        pylab.ylabel("$\\rho$")
+        pylab.xlim(0.01,1)
+        pylab.ylim(0.1,1)
+        pylab.yscale("log")
+        pylab.xscale("log")
+        pylab.plot(self.x1,numpy.log(rhop))
+        #############
+        pylab.subplot(222)
+        pylab.xlabel("Radius")
+        pylab.ylabel("P")
+        pylab.xlim(0.01,1)
+        pylab.ylim(0.01,10)
+        pylab.yscale("log")
+        pylab.xscale("log")
+        pylab.plot(self.x1,numpy.log(prsp))
+        #############
+        pylab.subplot(223)
+        pylab.xlabel("Radius")
+        pylab.ylabel("$v_r$")
+        pylab.xlim(0.01,1)
+        pylab.ylim(1,10)
+        pylab.yscale("log")
+        pylab.xscale("log")
+        pylab.plot(self.x1,abs(vradp))
+        #############
+        pylab.subplot(224)
+        pylab.xlabel("Radius")
+        pylab.ylabel("$v_\\phi$")
+        pylab.xlim(0.01,1)
+        pylab.ylim(0.01,1)
+        pylab.yscale("log")
+        pylab.xscale("log")
+        pylab.plot(self.x1,abs(vphp))
+        #############
+        pylab.savefig("sph_ana" + str(self.frame) + ".png",dpi=dpi)
+        if(self.frame == 0):
+            self.snap(20,60)
+        print "done i= %d" %self.frame
+        pylab.clf()
