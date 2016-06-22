@@ -437,39 +437,36 @@ n is the new number of elements n^2.
         for i in range(self.n2):
             pylab.hlines(self.x2[i],self.x1[0],self.x1[-1],'k',alpha=0.5)
 
-   def sph_analisys(self):
+def sph_analisys(Ni,Nf):
+        d = stone_plots(Ni,Nf)
         n = 4
         thmin = (90-n) * numpy.pi / 180.
         thmax = (90+n) * numpy.pi / 180.
         dpi = 400
         ######Setting vectors for plot#######
-        rhop = numpy.zeros(self.n1)
-        prsp = numpy.zeros(self.n1)
-        vphp = numpy.zeros(self.n1)
-        vradp = numpy.zeros(self.n1)
+        rhop = numpy.zeros(d.n1)
+        prsp = numpy.zeros(d.n1)
+        vphp = numpy.zeros(d.n1)
+        vradp = numpy.zeros(d.n1)
         ######Loop time!#######
-        for i in range(self.n1):
-            rho = numpy.zeros(self.n2)
-            prs = numpy.zeros(self.n2)
-            vph = numpy.zeros(self.n2)
-            vrad = numpy.zeros(self.n2)
-            for j in range(self.n2):
-                if( self.x2[j] > thmin ):
-                    rho[j] = self.rho[i,j]
-                    prs[j] = self.p[i,j]
-                    vph[j] = self.v2[i,j]
-                    vrad[j] = self.v1[i,j]
-                    #degree test
-                    if(self.frame == 0):
-                        self.rho[i][j] = 10;
-                if(self.x2[j] > thmax):
+        for i in range(d.n1):
+            rho = numpy.zeros(d.n2)
+            prs = numpy.zeros(d.n2)
+            vph = numpy.zeros(d.n2)
+            vrad = numpy.zeros(d.n2)
+            for j in range(d.n2):
+                if( d.x2[j] > thmin ):
+                    rho[j] = d.rho[i,j]
+                    prs[j] = d.p[i,j]
+                    vph[j] = d.v2[i,j]
+                    vrad[j] = d.v1[i,j]
+                if(d.x2[j] > thmax):
                     break
             rhop[i] = numpy.sum(rho)
             prsp[i] = numpy.sum(prs)
             vphp[i] = numpy.sum(vph)
             vradp[i] = numpy.sum(vrad)
         #############
-        pylab.title("t = %.2f" % self.pp.SimTime)
         pylab.subplot(221)
         pylab.xlabel("Radius")
         pylab.ylabel("$\\rho$")
@@ -477,7 +474,7 @@ n is the new number of elements n^2.
         pylab.ylim(0.1,1)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(self.x1,numpy.log(rhop))
+        pylab.plot(d.x1,numpy.log(rhop))
         #############
         pylab.subplot(222)
         pylab.xlabel("Radius")
@@ -486,7 +483,7 @@ n is the new number of elements n^2.
         pylab.ylim(0.01,10)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(self.x1,numpy.log(prsp))
+        pylab.plot(d.x1,numpy.log(prsp))
         #############
         pylab.subplot(223)
         pylab.xlabel("Radius")
@@ -495,7 +492,7 @@ n is the new number of elements n^2.
         pylab.ylim(1,10)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(self.x1,abs(vradp))
+        pylab.plot(d.x1,abs(vradp))
         #############
         pylab.subplot(224)
         pylab.xlabel("Radius")
@@ -504,10 +501,42 @@ n is the new number of elements n^2.
         pylab.ylim(0.01,1)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(self.x1,abs(vphp))
+        pylab.plot(d.x1,abs(vphp))
         #############
-        pylab.savefig("sph_ana" + str(self.frame) + ".png",dpi=dpi)
-        if(self.frame == 0):
-            self.snap(20,60)
-        print "done i= %d" %self.frame
+        pylab.savefig("sph_ana" + ".png",dpi=dpi)
         pylab.clf()
+###################################################
+def sum_pclass(soma,aux):
+    soma.x1 += aux.x1
+    soma.v1 += aux.v1
+    if(soma.n2>1):
+        soma.x2 += aux.x2
+        soma.v2 += aux.v2
+    if(soma.n3>1):
+        soma.x3 += aux.x3
+        soma.v3 += aux.v3
+    soma.p += aux.p
+    soma.rho += aux.rho
+###################################################
+def normalize(soma,k):
+    soma.x1 /= k
+    soma.v1 /= k
+    if(soma.n2>1):
+        soma.x2 /= k
+        soma.v2 /= k
+    if(soma.n3>1):
+        soma.x3 /= k
+        soma.v3 /= k
+    soma.p /= k
+    soma.rho /= k
+###################################################
+def stone_plots(Ni,Nf):
+    k = 0
+    soma = Pluto(Ni)
+    for i in range(Ni+1,Nf+1):
+        aux = Pluto(i)
+        sum_pclass(soma,aux)
+        k += 1
+    normalize(soma,k)
+    return soma
+###################################################
