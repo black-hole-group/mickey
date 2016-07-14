@@ -8,6 +8,7 @@ import pyPLUTO as pp
 import numpy
 import matplotlib.pyplot as pylab
 from scipy import ndimage
+import scipy.interpolate
 
 
 
@@ -205,6 +206,24 @@ class Pluto:
    """
 
    def __init__(self, i=0):
+     if(i < 0):
+      self.x1=0
+      self.v1,self.n1=0,0
+      self.x2= 0
+      self.v2,self.n2=0,0
+      self.x3=0
+      self.v3,self.n3=0,0
+      self.speed=0
+      self.bx3 = 0
+
+      self.p=0
+      self.rho=0
+      self.pp=0 # pypluto object
+
+      self.frame=-1
+
+
+     else:
       d=pp.pload(i)
 
       # when getting xi below, assumes uniform grid
@@ -262,7 +281,7 @@ Creates snapshot of 2D simulation generated in any coordinates.
       # transposes the array because imshow is weird
       if(d.geometry=='POLAR'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                label1='R',label2='$\\phi$',title=r'Density $\rho$ ',
+                label1='x',label2='$y$',title=r'Density $\rho$ ',
                 cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % d.SimTime)
@@ -273,13 +292,14 @@ Creates snapshot of 2D simulation generated in any coordinates.
 
       if(d.geometry=='SPHERICAL'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                label1='R',label2='$\\theta$',title=r'Density $\rho$ ',
+                label1='R',label2='$z$',title=r'Density $\rho$ ',
                 cbar=(True,'vertical'),polar=[True,False],vmin=-9,vmax=rhomax) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % d.SimTime)
           #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
-          pylab.xlim(0,lim)
+          pylab.xlim(0,2*lim)
           pylab.ylim(-lim,lim)
+          pylab.tight_layout()
           print "Done i= %i" % self.frame
       else:
          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
@@ -324,14 +344,14 @@ n is the new number of elements n^2.
       """
       # creates copy of current object which will have the new
       # coordinates
-      obj=Pluto(self.frame)
+      obj=Pluto(-1) #TODO create a function that returns a zero pluto frame
       # r, theta
       r,th=self.x1,self.x2
       if(xlim == None):
           xlim = self.x1.max()
-
       xnew=numpy.linspace(-xlim, xlim, n)
       ynew=xnew.copy()
+
       rho=numpy.zeros((n,n))
       vx=numpy.zeros((n,n))
       vy=numpy.zeros((n,n))
@@ -341,10 +361,9 @@ n is the new number of elements n^2.
       # I am sure this can severely sped up
       for i in range(xnew.size):
           for j in range(ynew.size):
-              rnew,thnew=cart2pol(xnew[i],ynew[j])
               # position in old array
-              iref=search(rnew, r)
-              jref=search(thnew, th)
+              iref=search(xnew[i], r)
+              jref=search(ynew[j], th)
               rho[i,j]=self.rho[iref,jref]
               p[i,j]=self.p[iref,jref]
               vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
@@ -353,11 +372,10 @@ n is the new number of elements n^2.
       obj.x1,obj.x2=xnew,ynew
       obj.rho,obj.p=rho,p
       obj.v1,obj.v2 = vx,vy
-      print obj
 
       return obj
 
-   def cart(self, n=200, xlim =None):
+   def cart(self, n=200, xlim =None,):
       """
         Creates a new object with variables in cartesian coordinates.
         Useful if the object was created by PLUTO in polar coordinates.
@@ -371,35 +389,44 @@ n is the new number of elements n^2.
       """
       # creates copy of current object which will have the new
       # coordinates
-      obj=Pluto(self.frame)
+      obj=Pluto(-1) #TODO create a function that returns a zero pluto frame
       # r, theta
-      r,z=self.x1,self.x2
+      r,th=self.x1,self.x2
       if(xlim == None):
           xlim = self.x1.max()
 
-      xnew=numpy.linspace(self.x1.min(), xlim*2, n)
-      ynew=numpy.linspace(-xlim, xlim, n)
+      if(self.pp.geometry == "SPHERICAL"):
+          xnew=numpy.linspace(0, xlim, n)
+          ynew=numpy.linspace(-xlim, xlim, n)
+      else:
+          xnew=numpy.linspace(-xlim, xlim, n)
+          ynew=numpy.linspace(-xlim, xlim, n)
+      rho=numpy.zeros((n,n))
       vx=numpy.zeros((n,n))
       vy=numpy.zeros((n,n))
-      bx=numpy.zeros((n,n))
-      by=numpy.zeros((n,n))
+      p=rho.copy()
 
       # goes through new array
       # I am sure this can severely sped up
       for i in range(xnew.size):
           for j in range(ynew.size):
+              rnew,thnew=cart2pol(xnew[i],ynew[j])
               # position in old array
-              iref=search(xnew[i], r)
-              jref=search(ynew[j], z)
+              iref=search(rnew, r)
+              jref=search(thnew, th)
+              if(self.rho[iref,jref] < 1e-5):
+                  rho[i,j] = 1e-4
+#              elif(self.rho[iref,jref] > 0.512):
+#                  rho[i,j] = 0.512
+              else:
+                  rho[j,i]=self.rho[iref,jref]
+              p[j,i]=self.p[iref,jref]
               vx[j,i]=self.v1[iref,jref]
-              vy[j,i]=self.v2[iref,jref]
-#              bx[j,i]=self.bx1[iref,jref]
-#              by[j,i]=self.bx2[iref,jref]
-
+              vy[j,i]=self.v1[iref,jref]
 
       obj.x1,obj.x2=xnew,ynew
+      obj.rho,obj.p=rho,p
       obj.v1,obj.v2 = vx,vy
-      obj.bx1,obj.bx2 = bx,by
 
       return obj
 
@@ -436,8 +463,29 @@ n is the new number of elements n^2.
             pylab.vlines(self.x1[i],self.x2[0],self.x2[-1],'k',alpha=0.5)
         for i in range(self.n2):
             pylab.hlines(self.x2[i],self.x1[0],self.x1[-1],'k',alpha=0.5)
+   def contours(self,N,lim):
+        obj = self.cart(N,lim)
+        xi,yi,zi = obj.x1,obj.x2,numpy.log10(obj.rho)
+        #xi, yi = numpy.meshgrid(xi, yi)
 
-def sph_analisys(Ni,Nf):
+        #rbf = scipy.interpolate.Rbf(xi, yi, obj.rho, function='linear')
+        #zi = rbf(xi, yi)
+        pylab.clf()
+        d = self.pp
+        I = pp.Image()
+        I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+                label1='x',label2='$y$',title=r'Density $\rho$ ',
+                cbar=(True,'vertical'),polar=[True,False],vmin=-9,vmax=0) #polar automatic conversion =D
+        pylab.rcParams['contour.negative_linestyle'] = 'solid'
+        pylab.contour(xi,yi,zi,20,colors='k')
+        pylab.title("t = %.2f" % d.SimTime)
+        pylab.xlim(0,lim)
+        pylab.ylim(-lim/2.,lim/2.)
+
+        pylab.savefig("contour_plot"+str(self.frame)+".png",dpi=300)
+        pylab.clf()
+
+def sph_analisys(Ni,Nf,files=None):
         d = stone_plots(Ni,Nf)
         n = 4
         thmin = (90-n) * numpy.pi / 180.
@@ -474,7 +522,9 @@ def sph_analisys(Ni,Nf):
         pylab.ylim(0.1,1)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(d.x1,numpy.log(rhop))
+        if(files != None):
+            pylab.plot(files[0].T[0],files[0].T[1],'k')
+        pylab.plot(d.x1,numpy.log(rhop),'b')
         #############
         pylab.subplot(222)
         pylab.xlabel("Radius")
@@ -483,7 +533,9 @@ def sph_analisys(Ni,Nf):
         pylab.ylim(0.01,10)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(d.x1,numpy.log(prsp))
+        if(files != None):
+            pylab.plot(files[1].T[0],files[1].T[1],'k')
+        pylab.plot(d.x1,numpy.log(prsp),'b')
         #############
         pylab.subplot(223)
         pylab.xlabel("Radius")
@@ -492,7 +544,9 @@ def sph_analisys(Ni,Nf):
         pylab.ylim(1,10)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(d.x1,abs(vradp))
+        if(files != None):
+            pylab.plot(files[2].T[0],files[2].T[1],'k')
+        pylab.plot(d.x1,abs(vradp),'b')
         #############
         pylab.subplot(224)
         pylab.xlabel("Radius")
@@ -501,18 +555,25 @@ def sph_analisys(Ni,Nf):
         pylab.ylim(0.01,1)
         pylab.yscale("log")
         pylab.xscale("log")
-        pylab.plot(d.x1,abs(vphp))
+        if(files != None):
+            pylab.plot(files[3].T[0],files[3].T[1],'k')
+        pylab.plot(d.x1,abs(vphp),'b')
         #############
         pylab.savefig("sph_ana" + ".png",dpi=dpi)
         pylab.clf()
+        print "Done sph_plot"
+
+
+
+
 ###################################################
 def sum_pclass(soma,aux):
     soma.x1 += aux.x1
     soma.v1 += aux.v1
-    if(soma.n2>1):
+    if(soma.pp.n2>1):
         soma.x2 += aux.x2
         soma.v2 += aux.v2
-    if(soma.n3>1):
+    if(soma.pp.n3>1):
         soma.x3 += aux.x3
         soma.v3 += aux.v3
     soma.p += aux.p
@@ -521,10 +582,10 @@ def sum_pclass(soma,aux):
 def normalize(soma,k):
     soma.x1 /= k
     soma.v1 /= k
-    if(soma.n2>1):
+    if(soma.pp.n2>1):
         soma.x2 /= k
         soma.v2 /= k
-    if(soma.n3>1):
+    if(soma.pp.n3>1):
         soma.x3 /= k
         soma.v3 /= k
     soma.p /= k
