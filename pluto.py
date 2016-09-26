@@ -274,17 +274,13 @@ Creates snapshot of 2D simulation generated in any coordinates.
       lw = 5*self.speed/self.speed.max()
       I = pp.Image()
 
-      #x=range(0,self.n1)
-      #X,Y=numpy.meshgrid(x,x)
-
       pylab.clf()
-      # transposes the array because imshow is weird
       if(d.geometry=='POLAR'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
                 label1='x',label2='$y$',title=r'Density $\rho$ ',
                 cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
-          pylab.title("t = %.2f" % d.SimTime)
+          pylab.title("t = %.2f" % (d.SimTime))
           #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
           pylab.xlim(-lim,lim)
           pylab.ylim(-lim,lim)
@@ -293,9 +289,9 @@ Creates snapshot of 2D simulation generated in any coordinates.
       if(d.geometry=='SPHERICAL'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
                 label1='R',label2='$z$',title=r'Density $\rho$ ',
-                cbar=(True,'vertical'),polar=[True,False],vmin=-9,vmax=rhomax) #polar automatic conversion =D
+                cbar=(True,'vertical'),polar=[True,False],vmin=-5,vmax=rhomax) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
-          pylab.title("t = %.2f" % d.SimTime)
+          pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{max}$ = %.3f" % numpy.max(self.pp.rho))
           #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
           pylab.xlim(0,2*lim)
           pylab.ylim(-lim,lim)
@@ -330,12 +326,14 @@ Creates snapshot of 2D simulation generated in any coordinates.
 #      pylab.show()
 
 
-   def pol2cart(self, n=200, xlim =None):
+   def contour_newgrid(self, n=200, xlim = None,rhocut = None):
       """
 Creates a new object with variables in cartesian coordinates.
 Useful if the object was created by PLUTO in polar coordinates.
 
 n is the new number of elements n^2.
+xlim is the boundaries for the plot and the grid
+rhocut is used if you want to put a lower limit to the contours
 
 >>> import pluto
 >>> c=pluto.Pluto(100)
@@ -344,150 +342,115 @@ n is the new number of elements n^2.
       """
       # creates copy of current object which will have the new
       # coordinates
-      obj=Pluto(-1) #TODO create a function that returns a zero pluto frame
+      obj=Pluto(-1) #null pluto object
+      if(rhocut == None):
+          rhocut = -1
+
       # r, theta
       r,th=self.x1,self.x2
       if(xlim == None):
           xlim = self.x1.max()
-      xnew=numpy.linspace(-xlim, xlim, n)
-      ynew=xnew.copy()
+      gmtry = self.pp.geometry
 
-      rho=numpy.zeros((n,n))
-      vx=numpy.zeros((n,n))
-      vy=numpy.zeros((n,n))
-      p=rho.copy()
-
-      # goes through new array
-      # I am sure this can severely sped up
-      for i in range(xnew.size):
-          for j in range(ynew.size):
-              # position in old array
-              iref=search(xnew[i], r)
-              jref=search(ynew[j], th)
-              rho[i,j]=self.rho[iref,jref]
-              p[i,j]=self.p[iref,jref]
-              vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
-              vy[i,j]=self.v1[iref,jref] * numpy.sin(thnew)
-
-      obj.x1,obj.x2=xnew,ynew
-      obj.rho,obj.p=rho,p
-      obj.v1,obj.v2 = vx,vy
-
-      return obj
-
-   def cart(self, n=200, xlim =None,):
-      """
-        Creates a new object with variables in cartesian coordinates.
-        Useful if the object was created by PLUTO in polar coordinates.
-
-        n is the new number of elements n^2.
-
-        >>> imshowport pluto
-        >>> c=pluto.Pluto(100)
-        >>> p=c.pol2cart(400) # creates new object in polar coordinates
-        >>> p.snap() # plots in polar coords.
-      """
-      # creates copy of current object which will have the new
-      # coordinates
-      obj=Pluto(-1) #TODO create a function that returns a zero pluto frame
-      # r, theta
-      r,th=self.x1,self.x2
-      if(xlim == None):
-          xlim = self.x1.max()
-
-      if(self.pp.geometry == "SPHERICAL"):
+      if(gmtry == "SPHERICAL" or smtry == "CYLINRICAL"):
           xnew=numpy.linspace(0, xlim, n)
           ynew=numpy.linspace(-xlim, xlim, n)
       else:
           xnew=numpy.linspace(-xlim, xlim, n)
           ynew=numpy.linspace(-xlim, xlim, n)
+
       rho=numpy.zeros((n,n))
       vx=numpy.zeros((n,n))
       vy=numpy.zeros((n,n))
       p=rho.copy()
 
       # goes through new array
-      # I am sure this can severely sped up
       for i in range(xnew.size):
-          for j in range(ynew.size):
-              rnew,thnew=cart2pol(xnew[i],ynew[j])
-              # position in old array
-              iref=search(rnew, r)
-              jref=search(thnew, th)
-              if(self.rho[iref,jref] < 1e-5):
-                  rho[i,j] = 1e-4
-#              elif(self.rho[iref,jref] > 0.512):
-#                  rho[i,j] = 0.512
-              else:
-                  rho[j,i]=self.rho[iref,jref]
-              p[j,i]=self.p[iref,jref]
-              vx[j,i]=self.v1[iref,jref]
-              vy[j,i]=self.v1[iref,jref]
+        for j in range(ynew.size):
+            if(gmrty == "SPHERICAL" or gmrty == "CYLINDRICAL"):
+                rnew,thnew=cart2pol(xnew[i],ynew[j])
+                # position in old array
+                iref=search(rnew, r)
+                jref=search(thnew, th)
+                if(self.rho[iref,jref] < rhocut): #for contours with a low limit
+                   rho[i,j] = rhocut
+                else:
+                   rho[j,i]=self.rho[iref,jref]
+                p[j,i]=self.p[iref,jref]
+                vx[j,i]=self.v1[iref,jref]
+                vy[j,i]=self.v1[iref,jref]
 
+            else: #polar case for bondi
+                # position in old array
+                iref=search(xnew[i], r)
+                jref=search(ynew[j], th)
+                rho[i,j]=self.rho[iref,jref]
+                p[i,j]=self.p[iref,jref]
+                vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
+                vy[i,j]=self.v1[iref,jref] * numpy.sin(thnew)
+
+    #set new variables to null object
       obj.x1,obj.x2=xnew,ynew
       obj.rho,obj.p=rho,p
       obj.v1,obj.v2 = vx,vy
 
       return obj
 
-   def cart2(self, rmax =10,ylim= 5):
-        """This doesnt work, probably due to quiver plot"""
-
-        obj=Pluto(self.frame)
-        r,z = self.x1,self.x2
-        rnew = []
-        znew = []
-        rho = []
-        vx = []
-        vy = []
-        k = 0
-
-        for i in range(r.size):
-            if(r[i] > rmax): # if r is larger, surely z doesn't matter
-                vx.append([])
-                vy.append([])
-                for j in range(z.size):
-                    if((z[j] > -ylim) and (z[j] < ylim)):
-                        rnew.append(r[i])
-                        znew.append(z[i])
-                        vx[k].append(self.v1[i,j])
-                        vy[k].append(self.v2[i,j])
-                k +=1
-        obj.x1,obj.x2=rnew,znew
-        obj.v1,obj.v2 = vx,vy
-        return obj
-
-
-   def plot_grid(self):
-        for i in range(self.n1):
-            pylab.vlines(self.x1[i],self.x2[0],self.x2[-1],'k',alpha=0.5)
-        for i in range(self.n2):
-            pylab.hlines(self.x2[i],self.x1[0],self.x1[-1],'k',alpha=0.5)
-   def contours(self,N,lim):
-        obj = self.cart(N,lim)
+   def contours(self,N,lim,plot_flag='y'):
+        """
+    Function for contour plotting. It recieves some parameters to foward to respective functions.
+N is the size of grid
+lim is the plot limit
+plot_flag is if the user want to plot the density map
+        """
+        rhocut = None
+        if (self.pp.geometry == "SPHERICAL"):
+            rhocut = 5e-5
+        obj = self.contour_newgrid(N,lim,rhocut)
         xi,yi,zi = obj.x1,obj.x2,numpy.log10(obj.rho)
-        #xi, yi = numpy.meshgrid(xi, yi)
 
-        #rbf = scipy.interpolate.Rbf(xi, yi, obj.rho, function='linear')
-        #zi = rbf(xi, yi)
+        #plot the density map
         pylab.clf()
         d = self.pp
-        I = pp.Image()
-        I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-                label1='x',label2='$y$',title=r'Density $\rho$ ',
-                cbar=(True,'vertical'),polar=[True,False],vmin=-9,vmax=0) #polar automatic conversion =D
-        pylab.rcParams['contour.negative_linestyle'] = 'solid'
+        if(plot_flag == 'y'):
+            I = pp.Image()
+            I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+                    label1='x',label2='$y$',title=r'Density $\rho$ ',
+                    cbar=(True,'vertical'),polar=[True,False],cmap='YlOrBr',vmin=-4,vmax=0) #polar automatic conversion =D
+        #plot contour
+        pylab.rcParams['contour.negative_linestyle'] = 'solid' #set positive and negative contour as solid
         pylab.contour(xi,yi,zi,20,colors='k')
-        pylab.title("t = %.2f" % d.SimTime)
+        pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{max}$ = %.3f" % numpy.max(self.pp.rho))
         pylab.xlim(0,lim)
         pylab.ylim(-lim/2.,lim/2.)
 
         pylab.savefig("contour_plot"+str(self.frame)+".png",dpi=300)
         pylab.clf()
 
+def generic_plot(X,Y,**kwargs):
+    """
+    This function is made so the user can call an plot
+    using just one line
+    """
+    if(kwargs['subplt'] != None):
+        pylab.subplot(kwargs['subplt'])
+    if(kwargs['xlabel'] != None):
+        pylab.xlabel(kwargs['xlabel'])
+    if(kwargs['ylabel'] != None):
+        pylab.ylabel(kwargs['ylabel'])
+    if(kwargs['xlim'] != None):
+        pylab.xlim(kwargs['xlim'])
+    if(kwargs['ylim'] != None):
+        pylab.ylim(kwargs['ylim'])
+    if(kwargs['xscale'] != None):
+        pylab.xscale(kwargs['xscale'])
+    if(kwargs['yscale'] != None):
+        pylab.yscale(kwargs['yscale'])
+    pylab.plot(X,Y,kwargs['color'])
+
 def sph_analisys(Ni,Nf,files=None):
-        d = stone_plots(Ni,Nf)
-        n = 4
+        d = stone_fig5(Ni,Nf)
+        n = 5
         thmin = (90-n) * numpy.pi / 180.
         thmax = (90+n) * numpy.pi / 180.
         dpi = 400
@@ -514,52 +477,34 @@ def sph_analisys(Ni,Nf,files=None):
             prsp[i] = numpy.sum(prs)
             vphp[i] = numpy.sum(vph)
             vradp[i] = numpy.sum(vrad)
-        #############
-        pylab.subplot(221)
-        pylab.xlabel("Radius")
-        pylab.ylabel("$\\rho$")
-        pylab.xlim(0.01,1)
-        pylab.ylim(0.1,1)
-        pylab.yscale("log")
-        pylab.xscale("log")
+        ######Density#######
+        generic_plot(d.x1,numpy.log10(rhop),subplt=221,xlabel="Radius",
+                     ylabel="$\\rho$",xlim=[0.01,1],ylim=[0.1,1],xscale='log',
+                     yscale='log',color='b')
         if(files != None):
             pylab.plot(files[0].T[0],files[0].T[1],'k')
-        pylab.plot(d.x1,numpy.log(rhop),'b')
-        #############
-        pylab.subplot(222)
-        pylab.xlabel("Radius")
-        pylab.ylabel("P")
-        pylab.xlim(0.01,1)
-        pylab.ylim(0.01,10)
-        pylab.yscale("log")
-        pylab.xscale("log")
+        ######Pressure#######
+        generic_plot(d.x1,numpy.log10(prsp),subplt=222,xlabel="Radius",
+                     ylabel="$P$",xlim=[0.01,1],ylim=[0.01,10],xscale='log',
+                     yscale='log',color='b')
         if(files != None):
             pylab.plot(files[1].T[0],files[1].T[1],'k')
-        pylab.plot(d.x1,numpy.log(prsp),'b')
-        #############
-        pylab.subplot(223)
-        pylab.xlabel("Radius")
-        pylab.ylabel("$v_r$")
-        pylab.xlim(0.01,1)
-        pylab.ylim(1,10)
-        pylab.yscale("log")
-        pylab.xscale("log")
+        ######Radial Velocity#######
+        generic_plot(d.x1,numpy.abs(vradp),subplt=223,xlabel="Radius",
+                     ylabel="$v_r$",xlim=None,ylim=None,xscale='log',
+                     yscale='log',color='b')
         if(files != None):
             pylab.plot(files[2].T[0],files[2].T[1],'k')
-        pylab.plot(d.x1,abs(vradp),'b')
-        #############
-        pylab.subplot(224)
-        pylab.xlabel("Radius")
-        pylab.ylabel("$v_\\phi$")
-        pylab.xlim(0.01,1)
-        pylab.ylim(0.01,1)
-        pylab.yscale("log")
-        pylab.xscale("log")
+        ######Angular Velocity#######
+        generic_plot(d.x1,numpy.abs(vphp),subplt=224,xlabel="Radius",
+                     ylabel="$v_\\phi$",xlim=[0.01,1],ylim=[0.01,1],xscale='log',
+                     yscale='log',color='b')
         if(files != None):
             pylab.plot(files[3].T[0],files[3].T[1],'k')
-        pylab.plot(d.x1,abs(vphp),'b')
         #############
+        pylab.tight_layout()
         pylab.savefig("sph_ana" + ".png",dpi=dpi)
+        pylab.show()
         pylab.clf()
         print "Done sph_plot"
 
@@ -591,7 +536,7 @@ def normalize(soma,k):
     soma.p /= k
     soma.rho /= k
 ###################################################
-def stone_plots(Ni,Nf):
+def stone_fig5(Ni,Nf):
     k = 0
     soma = Pluto(Ni)
     for i in range(Ni+1,Nf+1):
