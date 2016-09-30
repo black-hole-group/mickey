@@ -331,14 +331,10 @@ Creates snapshot of 2D simulation generated in any coordinates.
 Creates a new object with variables in cartesian coordinates.
 Useful if the object was created by PLUTO in polar coordinates.
 
-n is the new number of elements n^2.
-xlim is the boundaries for the plot and the grid
-rhocut is used if you want to put a lower limit to the contours
+:param n: New number of elements n^2.
+:param xlim: Boundary for the plot and the grid
+:param rhocut: Variable used if you want to put a lower limit to the contours
 
->>> import pluto
->>> c=pluto.Pluto(100)
->>> p=c.pol2cart(400) # creates new object in polar coordinates
->>> p.snap() # plots in polar coords.
       """
       # creates copy of current object which will have the new
       # coordinates
@@ -398,10 +394,10 @@ rhocut is used if you want to put a lower limit to the contours
 
    def contours(self,N,lim,plot_flag='y'):
         """
-    Function for contour plotting. It recieves some parameters to foward to respective functions.
-N is the size of grid
-lim is the plot limit
-plot_flag is if the user want to plot the density map
+Function for contour plotting. It recieves some parameters to foward to respective functions.
+:param N: Size of grid
+:param lim: is the plot limit
+:param plot_flag: control the plot of the density map
         """
         rhocut = None
         if (self.pp.geometry == "SPHERICAL"):
@@ -449,64 +445,64 @@ def generic_plot(X,Y,**kwargs):
     pylab.plot(X,Y,kwargs['color'])
 
 def sph_analisys(Ni,Nf,files=None):
-        d = stone_fig5(Ni,Nf)
-        n = 5
-        thmin = (90-n) * numpy.pi / 180.
-        thmax = (90+n) * numpy.pi / 180.
-        dpi = 400
-        ######Setting vectors for plot#######
-        rhop = numpy.zeros(d.n1)
-        prsp = numpy.zeros(d.n1)
-        vphp = numpy.zeros(d.n1)
-        vradp = numpy.zeros(d.n1)
-        ######Loop time!#######
-        for i in range(d.n1):
-            rho = numpy.zeros(d.n2)
-            prs = numpy.zeros(d.n2)
-            vph = numpy.zeros(d.n2)
-            vrad = numpy.zeros(d.n2)
-            for j in range(d.n2):
-                if( d.x2[j] > thmin ):
-                    rho[j] = d.rho[i,j]
-                    prs[j] = d.p[i,j]
-                    vph[j] = d.v2[i,j]
-                    vrad[j] = d.v1[i,j]
-                if(d.x2[j] > thmax):
-                    break
-            rhop[i] = numpy.sum(rho)
-            prsp[i] = numpy.sum(prs)
-            vphp[i] = numpy.sum(vph)
-            vradp[i] = numpy.sum(vrad)
-        ######Density#######
-        generic_plot(d.x1,numpy.log10(rhop),subplt=221,xlabel="Radius",
-                     ylabel="$\\rho$",xlim=[0.01,1],ylim=[0.1,1],xscale='log',
-                     yscale='log',color='b')
-        if(files != None):
-            pylab.plot(files[0].T[0],files[0].T[1],'k')
-        ######Pressure#######
-        generic_plot(d.x1,numpy.log10(prsp),subplt=222,xlabel="Radius",
-                     ylabel="$P$",xlim=[0.01,1],ylim=[0.01,10],xscale='log',
-                     yscale='log',color='b')
-        if(files != None):
-            pylab.plot(files[1].T[0],files[1].T[1],'k')
-        ######Radial Velocity#######
-        generic_plot(d.x1,numpy.abs(vradp),subplt=223,xlabel="Radius",
-                     ylabel="$v_r$",xlim=None,ylim=None,xscale='log',
-                     yscale='log',color='b')
-        if(files != None):
-            pylab.plot(files[2].T[0],files[2].T[1],'k')
-        ######Angular Velocity#######
-        generic_plot(d.x1,numpy.abs(vphp),subplt=224,xlabel="Radius",
-                     ylabel="$v_\\phi$",xlim=[0.01,1],ylim=[0.01,1],xscale='log',
-                     yscale='log',color='b')
-        if(files != None):
-            pylab.plot(files[3].T[0],files[3].T[1],'k')
-        #############
-        pylab.tight_layout()
-        pylab.savefig("sph_ana" + ".png",dpi=dpi)
-        pylab.show()
-        pylab.clf()
-        print "Done sph_plot"
+    d = stone_fig5(Ni,Nf)
+    n = 5
+    thmin = (90-n) * numpy.pi / 180.
+    thmax = (90+n) * numpy.pi / 180.
+    dpi = 400
+    ######Setting vectors for plot#######
+    rhop = numpy.zeros(d.n1)
+    prsp = numpy.zeros(d.n1)
+    vphp = numpy.zeros(d.n1)
+    vradp = numpy.zeros(d.n1)
+    ######Loop time!#######
+    for i in range(d.n1):
+        rho = numpy.zeros(d.n2)
+        prs = numpy.zeros(d.n2)
+        vph = numpy.zeros(d.n2)
+        vrad = numpy.zeros(d.n2)
+        for j in range(d.n2):
+            if( d.x2[j] > thmin ):
+                rho[j] = d.rho[i,j]
+                prs[j] = d.p[i,j]
+                vph[j] = d.v2[i,j]
+                vrad[j] = d.v1[i,j]
+            if(d.x2[j] > thmax):
+                break
+        rhop[i] = numpy.sum(rho)
+        prsp[i] = numpy.sum(prs)
+        vphp[i] = numpy.sum(vph)
+        vradp[i] = numpy.sum(vrad)
+    ######Density#######
+    generic_plot(d.x1,numpy.log10(rhop),subplt=221,xlabel="Radius",
+                ylabel="$\\rho$",xlim=[0.01,1],ylim=[0.1,1],xscale='log',
+                yscale='log',color='b')
+    if(files != None):
+        pylab.plot(files[0].T[0],files[0].T[1],'k')
+    ######Pressure#######
+    generic_plot(d.x1,numpy.log10(prsp),subplt=222,xlabel="Radius",
+                ylabel="$P$",xlim=[0.01,1],ylim=[0.01,10],xscale='log',
+                yscale='log',color='b')
+    if(files != None):
+        pylab.plot(files[1].T[0],files[1].T[1],'k')
+    ######Radial Velocity#######
+    generic_plot(d.x1,numpy.abs(vradp),subplt=223,xlabel="Radius",
+                ylabel="$v_r$",xlim=None,ylim=None,xscale='log',
+                yscale='log',color='b')
+    if(files != None):
+        pylab.plot(files[2].T[0],files[2].T[1],'k')
+    ######Angular Velocity#######
+    generic_plot(d.x1,numpy.abs(vphp),subplt=224,xlabel="Radius",
+                ylabel="$v_\\phi$",xlim=[0.01,1],ylim=[0.01,1],xscale='log',
+                yscale='log',color='b')
+    if(files != None):
+        pylab.plot(files[3].T[0],files[3].T[1],'k')
+    #############
+    pylab.tight_layout()
+    pylab.savefig("sph_ana" + ".png",dpi=dpi)
+    pylab.show()
+    pylab.clf()
+    print "Done sph_plot"
 
 
 

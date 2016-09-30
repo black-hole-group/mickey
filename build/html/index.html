@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to pluto-tools’s documentation! &#8212; pluto-tools 0.5 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="pluto-tools 0.5 documentation" href="#" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pluto-tools-s-documentation">
+<h1>Welcome to pluto-tools&#8217;s documentation!<a class="headerlink" href="#welcome-to-pluto-tools-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-pluto"></span><p>Methods to read and visualize PLUTO&#8217;s output.</p>
+<dl class="class">
+<dt id="pluto.Pluto">
+<em class="property">class </em><code class="descclassname">pluto.</code><code class="descname">Pluto</code><span class="sig-paren">(</span><em>i=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pluto.Pluto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class that defines data objects imported from PLUTO.</p>
+<p>The object&#8217;s attributes are:</p>
+<ul class="simple">
+<li>x1,x2,x3</li>
+<li>v1,v2,v3</li>
+<li>pressure p</li>
+<li>rho</li>
+<li>n1,n2,n3</li>
+<li>bx1, bx2, bx3</li>
+</ul>
+<p>To read the simulation output for frame 10:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pluto</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">pluto</span><span class="o">.</span><span class="n">Pluto</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plots density field:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="pluto.Pluto.contour_newgrid">
+<code class="descname">contour_newgrid</code><span class="sig-paren">(</span><em>n=200</em>, <em>xlim=None</em>, <em>rhocut=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pluto.Pluto.contour_newgrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new object with variables in cartesian coordinates.
+Useful if the object was created by PLUTO in polar coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> &#8211; New number of elements n^2.</li>
+<li><strong>xlim</strong> &#8211; Boundary for the plot and the grid</li>
+<li><strong>rhocut</strong> &#8211; Variable used if you want to put a lower limit to the contours</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pluto.Pluto.contours">
+<code class="descname">contours</code><span class="sig-paren">(</span><em>N</em>, <em>lim</em>, <em>plot_flag='y'</em><span class="sig-paren">)</span><a class="headerlink" href="#pluto.Pluto.contours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function for contour plotting. It recieves some parameters to foward to respective functions.
+:param N: Size of grid
+:param lim: is the plot limit
+:param plot_flag: control the plot of the density map</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pluto.Pluto.snap">
+<code class="descname">snap</code><span class="sig-paren">(</span><em>n=20</em>, <em>lim=10</em>, <em>rhomax=2</em>, <em>stream='n'</em>, <em>mag='n'</em>, <em>var=None</em>, <em>hor=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pluto.Pluto.snap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates snapshot of 2D simulation generated in any coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>n</strong> &#8211; Number of uniform divisions in x and y for the quiver plot</li>
+<li><strong>lim</strong> &#8211; The limits which the graph will be plotted (from -lim to lim)</li>
+<li><strong>var</strong> &#8211; variable to be plotted. If not specified, assumes rho</li>
+<li><strong>hor</strong> &#8211; plots circle at inner boundary radius with radius=hor. If None, no circle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="n">pluto</span><span class="o">.</span><span class="n">Pluto</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">snap</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">p</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pluto.sph_analisys">
+<code class="descclassname">pluto.</code><code class="descname">sph_analisys</code><span class="sig-paren">(</span><em>Ni</em>, <em>Nf</em>, <em>files=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pluto.sph_analisys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to pluto-tools&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Henrique Gubolin.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
