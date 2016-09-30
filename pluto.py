@@ -394,7 +394,7 @@ Useful if the object was created by PLUTO in polar coordinates.
 
    def contours(self,N,lim,plot_flag='y'):
         """
-Function for contour plotting. It recieves some parameters to foward to respective functions.
+Function for contour plotting. It can plot also the density map, setting plot_flag to 'y' 
 :param N: Size of grid
 :param lim: is the plot limit
 :param plot_flag: control the plot of the density map
@@ -445,6 +445,14 @@ def generic_plot(X,Y,**kwargs):
     pylab.plot(X,Y,kwargs['color'])
 
 def sph_analisys(Ni,Nf,files=None):
+    """
+Function to make plots 5 and 6 of stone et al 99. It also plots the stone version of this plot if you extracted the data from the pdf. Not yet working properly #TODO: fix normalization and units
+
+:param Ni: Starting snapshot
+:param Nf: Ending snapshot
+:param files: A path to files that contain the data from stone
+
+    """
     d = stone_fig5(Ni,Nf)
     n = 5
     thmin = (90-n) * numpy.pi / 180.
@@ -509,6 +517,11 @@ def sph_analisys(Ni,Nf,files=None):
 
 ###################################################
 def sum_pclass(soma,aux):
+    """ 
+Recieves two pluto classes and sum aux into soma.
+:param soma: Pluto class that will be added aux
+:param aux: Pluto class to be added in soma
+    """ 
     soma.x1 += aux.x1
     soma.v1 += aux.v1
     if(soma.pp.n2>1):
@@ -521,6 +534,11 @@ def sum_pclass(soma,aux):
     soma.rho += aux.rho
 ###################################################
 def normalize(soma,k):
+    """ 
+Recieves two pluto classes and normalizes by k
+:param soma: Pluto class to be normalized
+:param k: number to normalize 
+    """ 
     soma.x1 /= k
     soma.v1 /= k
     if(soma.pp.n2>1):
@@ -533,6 +551,11 @@ def normalize(soma,k):
     soma.rho /= k
 ###################################################
 def stone_fig5(Ni,Nf):
+    """
+Function to plot stone fig5. Defintly not working
+:param Ni: Starting snapshot
+:param Nf: Ending snapshot
+    """
     k = 0
     soma = Pluto(Ni)
     for i in range(Ni+1,Nf+1):
