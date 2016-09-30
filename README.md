@@ -2,6 +2,8 @@ PLUTO Tools
 ============
 
 Assorted methods and classes to handle and visualize the output of the PLUTO MHD code.
+
+# Simple examples 
 	
 #### To read the simulation output for snapshot 10 (e.g. rho.0010.dbl etc):
 	
@@ -57,3 +59,10 @@ This will create two movie files -- movie.avi and movie.mov (OS X compatible) --
 *mencoder.sh* has two dependencies: mencoder and ffmpeg.
 
 #### More examples coming soon.
+
+
+
+# Full torus simulation and analysis
+
+PUT HERE THE LINK TO THE JUPYTER NOTEBOOK
+
