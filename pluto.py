@@ -206,6 +206,7 @@ class Pluto:
    """
 
    def __init__(self, i=0):
+     # if i<0, everything is set to null values
      if(i < 0):
       self.x1=0
       self.v1,self.n1=0,0
@@ -256,7 +257,8 @@ class Pluto:
 
    def snap(self,n=20,lim=10,rhomax = 2,stream = 'n',mag = 'n',var=None,hor=None):
       """
-Creates snapshot of 2D simulation generated in any coordinates.
+Renders the density field for a given frame. 
+Input: 2D simulation generated in any coordinates.
 
 :param n: Number of uniform divisions in x and y for the quiver plot
 :param lim: The limits which the graph will be plotted (from -lim to lim)
@@ -275,6 +277,8 @@ Creates snapshot of 2D simulation generated in any coordinates.
       I = pp.Image()
 
       pylab.clf()
+      # Depending on the geometry, calls the appropriate function
+      # to perform coordinate transformations
       if(d.geometry=='POLAR'):
           I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
                 label1='x',label2='$y$',title=r'Density $\rho$ ',
@@ -328,8 +332,8 @@ Creates snapshot of 2D simulation generated in any coordinates.
 
    def contour_newgrid(self, n=200, xlim = None,rhocut = None):
       """
-Creates a new object with variables in cartesian coordinates.
-Useful if the object was created by PLUTO in polar coordinates.
+Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
+into a uniform grid in the same coordinates.
 
 :param n: New number of elements n^2.
 :param xlim: Boundary for the plot and the grid
@@ -394,7 +398,9 @@ Useful if the object was created by PLUTO in polar coordinates.
 
    def contours(self,N,lim,plot_flag='y'):
         """
-Function for contour plotting. It can plot also the density map, setting plot_flag to 'y' 
+Function for contour plotting. It can plot also the density map, 
+setting plot_flag to 'y' 
+
 :param N: Size of grid
 :param lim: is the plot limit
 :param plot_flag: control the plot of the density map
@@ -444,17 +450,27 @@ def generic_plot(X,Y,**kwargs):
         pylab.yscale(kwargs['yscale'])
     pylab.plot(X,Y,kwargs['color'])
 
+
+
+
+
 def sph_analisys(Ni,Nf,files=None):
     """
-Function to make plots 5 and 6 of stone et al 99. It also plots the stone version of this plot if you extracted the data from the pdf. Not yet working properly #TODO: fix normalization and units
+Function to make plots 5 and 6 of stone et al 99. 
+It also plots the stone version of this plot if you extracted the data 
+from the pdf. **Not yet working properly**
 
 :param Ni: Starting snapshot
 :param Nf: Ending snapshot
 :param files: A path to files that contain the data from stone
 
+.. todo:: fix normalization and units
+.. todo:: allow to specify *ti, tf* instead of *Ni*, *Nf*
     """
     d = stone_fig5(Ni,Nf)
-    n = 5
+    # opening angle (theta) in degrees that will be used to make averaging
+    # around the equator
+    n = 5 
     thmin = (90-n) * numpy.pi / 180.
     thmax = (90+n) * numpy.pi / 180.
     dpi = 400
@@ -518,7 +534,10 @@ Function to make plots 5 and 6 of stone et al 99. It also plots the stone versio
 ###################################################
 def sum_pclass(soma,aux):
     """ 
-Recieves two pluto classes and sum aux into soma.
+Receives two pluto classes and sum aux into soma.
+In other words, sums all variables for two states
+of the simulation.
+
 :param soma: Pluto class that will be added aux
 :param aux: Pluto class to be added in soma
     """ 
@@ -533,9 +552,11 @@ Recieves two pluto classes and sum aux into soma.
     soma.p += aux.p
     soma.rho += aux.rho
 ###################################################
-def normalize(soma,k):
+def mean(soma,k):
     """ 
-Recieves two pluto classes and normalizes by k
+Receives two pluto classes and computes the mean of
+all variables associated.
+
 :param soma: Pluto class to be normalized
 :param k: number to normalize 
     """ 
@@ -552,9 +573,12 @@ Recieves two pluto classes and normalizes by k
 ###################################################
 def stone_fig5(Ni,Nf):
     """
-Function to plot stone fig5. Defintly not working
+Function to plot stone fig5.
+
 :param Ni: Starting snapshot
 :param Nf: Ending snapshot
+
+.. warning:: Defintly not working. Cf. normalization.
     """
     k = 0
     soma = Pluto(Ni)
