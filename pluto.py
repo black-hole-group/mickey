@@ -6,6 +6,7 @@ Methods to read and visualize PLUTO's output.
 import pyPLUTO as pp
 #import pylab, numpy
 import numpy
+import os
 import matplotlib.pyplot as pylab
 from scipy import ndimage
 import scipy.interpolate
@@ -257,7 +258,7 @@ class Pluto:
 
    def snap(self,n=20,lim=10,rhomax = 2,stream = 'n',mag = 'n',var=None,hor=None):
       """
-Renders the density field for a given frame. 
+Renders the density field for a given frame.
 Input: 2D simulation generated in any coordinates.
 
 :param n: Number of uniform divisions in x and y for the quiver plot
@@ -398,8 +399,8 @@ into a uniform grid in the same coordinates.
 
    def contours(self,N,lim,plot_flag='y'):
         """
-Function for contour plotting. It can plot also the density map, 
-setting plot_flag to 'y' 
+Function for contour plotting. It can plot also the density map,
+setting plot_flag to 'y'
 
 :param N: Size of grid
 :param lim: is the plot limit
@@ -456,8 +457,8 @@ def generic_plot(X,Y,**kwargs):
 
 def sph_analisys(Ni,Nf,files=None):
     """
-Function to make plots 5 and 6 of stone et al 99. 
-It also plots the stone version of this plot if you extracted the data 
+Function to make plots 5 and 6 of stone et al 99.
+It also plots the stone version of this plot if you extracted the data
 from the pdf. **Not yet working properly**
 
 :param Ni: Starting snapshot
@@ -470,7 +471,7 @@ from the pdf. **Not yet working properly**
     d = stone_fig5(Ni,Nf)
     # opening angle (theta) in degrees that will be used to make averaging
     # around the equator
-    n = 5 
+    n = 5
     thmin = (90-n) * numpy.pi / 180.
     thmax = (90+n) * numpy.pi / 180.
     dpi = 400
@@ -533,14 +534,14 @@ from the pdf. **Not yet working properly**
 
 ###################################################
 def sum_pclass(soma,aux):
-    """ 
+    """
 Receives two pluto classes and sum aux into soma.
 In other words, sums all variables for two states
 of the simulation.
 
 :param soma: Pluto class that will be added aux
 :param aux: Pluto class to be added in soma
-    """ 
+    """
     soma.x1 += aux.x1
     soma.v1 += aux.v1
     if(soma.pp.n2>1):
@@ -553,13 +554,13 @@ of the simulation.
     soma.rho += aux.rho
 ###################################################
 def mean(soma,k):
-    """ 
+    """
 Receives two pluto classes and computes the mean of
 all variables associated.
 
 :param soma: Pluto class to be normalized
-:param k: number to normalize 
-    """ 
+:param k: number to normalize
+    """
     soma.x1 /= k
     soma.v1 /= k
     if(soma.pp.n2>1):
@@ -586,6 +587,125 @@ Function to plot stone fig5.
         aux = Pluto(i)
         sum_pclass(soma,aux)
         k += 1
-    normalize(soma,k)
+    mean(soma,k)
     return soma
 ###################################################
+
+def torus_plot(args):
+    i,n,lim,rhomax,stream,mag = args[0],args[1],args[2],args[3],args[4],args[5]
+    D = Pluto(i)
+    D.snap(n,lim,rhomax,stream,mag)
+    del D
+
+def contour_plot(args):
+    D,N,lim = Pluto(args[0]),args[1],args[2]
+    D.contours(N,lim)
+    print "Done i = %d" %D.frame
+    del D
+
+def run_fig2(Rb,Nf,t_tot):
+    Njump = 1
+    R = numpy.zeros(Nf+1)
+    t = numpy.zeros(Nf+1)
+    Rfin=0
+    for i in range(Nf+1):
+        if(i%Njump == 0):
+            pp = Pluto(i)
+            if(i==0):
+                print pp.rho.sum()
+            X,Y = numpy.meshgrid(pp.x2,pp.x1)
+            M = numpy.abs(-2*numpy.pi*Rb**2 *X*pp.rho*pp.v1*Y*numpy.sin(Y)*abs(pp.x2[0]-pp.x2[1]))
+            R[i] = numpy.sum(M[:,0])
+            t[i] = pp.pp.SimTime / (2*numpy.pi)
+            if(pp.pp.SimTime > (t_tot-2*numpy.pi)):
+                Rfin += R[i]
+    #pylab.plot(numpy.linspace(0,t/(2*numpy.pi),Nf/Njump + 1),R,'k')
+    pylab.plot(t,R,'k')
+    pylab.yscale('log')
+    pylab.xlabel("Orbits")
+    pylab.ylabel("Mdot")
+#    pylab.ylim(1e-4,1e-2)
+    pylab.savefig("teste.png")
+    pylab.show()
+    print("Macc = %e" % Rfin)
+
+def integ(pp):
+    dr = numpy.zeros(pp.n1)
+    dth = numpy.zeros(pp.n2)
+    for i in range(pp.n1-1):
+        dr[i] = numpy.abs(pp.x1[i]-pp.x1[i+1])
+    for i in range(pp.n2-1):
+        dth[i] = numpy.abs(pp.x2[i]-pp.x2[i+1])
+    dX,dY = numpy.meshgrid(dth,dr,sparse=True)
+    X,Y = numpy.meshgrid(pp.x2,pp.x1,sparse=True)
+
+    M = 2*numpy.pi*pp.rho*X**2 * numpy.sin(Y) * dX * dY
+    soma = numpy.sum(M)
+    print soma
+    return soma
+
+def interpolate(pp):
+    X,Y = numpy.meshgrid(pp.x2,pp.x1)
+    f = sp.interpolate.interp2d(pp.rho,X,Y,kind='linear')
+    pylab.imshow(f(pp.x1,pp.x2))
+    pylab.show()
+
+def call_multiprocess(f,N,w_dir,N_procs):
+   os.chdir(w_dir)
+   p = mp.Pool(N_procs)
+   aux = []
+   for i in range(N):
+       aux.append(i)
+   p.map(f,aux)
+   os.system("sh density.sh 60 density")
+   os.chdir("..")
+
+
+
+def run_torus(w_dir,N_snap,xlim,Nmin=0):
+    os.chdir(w_dir)
+    bnd = []
+    n = 400
+    rhomax = 0
+    stream = 'y'
+    mag = 'y'
+    for i in range(Nmin,N_snap+1):
+        bnd.append([i,n,xlim,rhomax,stream,mag])
+    #p = mp.Pool(mp.cpu_count())
+    proc = 8
+    p = mp.Pool(proc)
+    p.map(torus_plot,bnd)
+    #density_plot([10,100,0.1])
+    os.system("sh density.sh 60 density")
+    os.chdir("..")
+
+def run_contour(w_dir,N_snap,N,Nmin=0):
+    os.chdir(w_dir)
+    Nmax = 200
+    bnd = []
+    lim = 2
+    proc = 8
+    p = mp.Pool(proc)
+    for i in range(Nmin,N_snap+1):
+        if(i%Nmax == 0):
+            p.map(contour_plot,bnd)
+            del bnd
+            bnd = []
+        bnd.append([i,N,lim])
+    p.map(contour_plot,bnd)
+    os.system("sh contour.sh 60 contour")
+    os.chdir("..")
+
+
+def run_fig5(w_dir,ni,nf):
+    ###########
+    Nplots = 4
+    files = []
+    for i in range(Nplots):
+        files.append(numpy.loadtxt(w_dir+"../"+"digt_data/plot_stone"+str(i+1)+".csv",delimiter=','))
+    ###########
+    os.chdir(w_dir)
+    sph_analisys(ni,nf,files)
+    #stone_fig2(0.01,nf)
+    os.chdir("..")
+
