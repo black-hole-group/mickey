@@ -244,7 +244,7 @@ class Pluto:
          self.x3=d.x3
          self.v3,self.n3=d.vx3,d.n3
          self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
-         self.bx3 = d.bx3
+#         self.bx3 = d.bx3
 
       self.p=d.prs
       self.rho=d.rho
@@ -710,3 +710,99 @@ def run_fig5(w_dir,ni,nf):
     #stone_fig2(0.01,nf)
     os.chdir("..")
 
+def plotB1(bnd):#,cs_inf,rho_inf):
+   import numpy as np
+   import matplotlib.pylab as plt
+   """
+      Create a jpeg for a given snapshot using B1 parameters
+      where bnd is a vector with a loaded bondi class
+   """
+   r = np.linspace(0.1,5)
+   color = 'r'
+   s = 5.0
+   marker = '.'
+   gamma = 5./3
+   C1 = 10.1
+   C2 = 0.01
+   C3 = 1.4
+   t = 1.53
+   Nmax = 153
+   ################
+   plt.subplot(221)
+   plt.title("t = %.2f" % (bnd.pp.SimTime))
+   for j in range(bnd.n2):
+       for k in range(bnd.n3):
+               plt.scatter(bnd.x1,bnd.rho[:,j,k],color=color,s=s,marker=marker,label="Simulation")
+   plt.plot(r/10,C1*np.power(r,-3/2.),label="Model")
+   data = np.loadtxt("B1_rho.csv",delimiter=',')
+   plt.plot(data.T[0],data.T[1],'k',label="Ruffert 94")
+   plt.xlabel("Radius $R$")
+   plt.ylabel("Density $\\rho$")
+   plt.ylim(1,200)
+   plt.xlim(1e-2,5e0)
+   plt.yscale('log')
+   plt.xscale('log')
+   plt.legend(loc=0,prop={'size':10})
+   plt.grid(True)
+   ################
+   plt.subplot(222)
+   csv = np.sqrt(gamma*bnd.p/bnd.rho)
+   for j in range(bnd.n2):
+       for k in range(bnd.n3):
+           plt.scatter(bnd.x1,map(abs,bnd.v1[:,j,k]/csv[:,j,k]),color=color,s=s,marker=marker)
+   plt.plot(r,C2*np.power(r,-2))
+   data = np.loadtxt("B1_mach.csv",delimiter=',')
+   plt.plot(data.T[0],data.T[1],'k')
+   plt.xlabel("Radius $R$")
+   plt.ylabel("$ v/c $")
+   plt.ylim(1e-1,2)
+   plt.xlim(1e-2,5e0)
+   plt.legend(loc=0,prop={'size':10})
+   plt.yscale('log')
+   plt.xscale('log')
+   plt.grid(True)
+   ################
+   plt.subplot(223)
+   #acc = 4*np.pi*bnd.R_b**2*bnd.rho_inf*bnd.cs_inf
+   #bnd_acc= np.linspace(acc,acc,len(bnd.r))
+#   plt.scatter(bnd.x2,bnd.flux,color=color,s=s,marker=marker)
+   #print '%.2f' % bnd.flux[bnd.indx]
+#   plt.scatter(bnd.r,bnd_acc,color='b',s=s,marker=marker)
+   plt.xlabel("Radius $R$")
+   plt.ylabel("Accretion Rate $\dot M$")
+   plt.xlim(1e-2,5e0)
+   plt.ylim(0,10)
+   #plt.yscale('log')
+   plt.xscale('log')
+   plt.legend(loc=0,prop={'size':10})
+   plt.grid(True)
+   ################
+   plt.subplot(224)
+   for j in range(bnd.n2):
+       for k in range(bnd.n3):
+           plt.scatter(bnd.x1,csv[:,j,k],color=color,s=s,marker=marker)
+   plt.plot(r/10,C3*np.power(r,-1/2.))
+   data = np.loadtxt("B1_sspeed.csv",delimiter=',')
+   plt.plot(data.T[0],data.T[1],'k')
+   plt.xlabel("Radius $R$")
+   plt.ylabel("Sound Speed $c_s$")
+   plt.ylim(1,10)
+   plt.xlim(1e-2,5)
+   plt.yscale('log')
+   plt.xscale('log')
+   plt.grid(True)
+   plt.legend(loc=0,prop={'size':10})
+   ################
+   plt.tight_layout()
+   plt.savefig("rho_vel" + str(bnd.frame) + ".jpeg",dpi=400)
+   plt.clf()
+
+   print "Done i=",bnd.frame
+
+
+def run_mayavi(i):
+    from mayavi.mlab import quiver3d
+
+    d = pluto(i)
+
+    quiver3D(d.rho)
