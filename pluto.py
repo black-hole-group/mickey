@@ -362,6 +362,12 @@ Creates snapshot of 2D simulation generated in cartesian coordinates.
 		pylab.savefig('plot.'+str(self.frame)+'.jpeg')
 
 
+
+
+
+
+
+
 	def pol2cart(self, n=200):
 		"""
 Creates a new object with variables in cartesian coordinates.

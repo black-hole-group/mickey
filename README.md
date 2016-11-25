@@ -57,3 +57,9 @@ This will create two movie files -- movie.avi and movie.mov (OS X compatible) --
 *mencoder.sh* has two dependencies: mencoder and ffmpeg.
 
 #### More examples coming soon.
+
+# TODO
+
+- [ ] compute total mass in volume
+- [ ] compute Mdot for a given radius
+- [ ] compute energy, a.m. 
