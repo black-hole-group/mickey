@@ -285,7 +285,7 @@ Input: 2D simulation generated in any coordinates.
       cmap = 'Oranges'
       if(d.geometry=='POLAR'):
           I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
-                label1='x',label2='$y$',title=r'Density $\rho$ ',
+                ≤label1='x',label2='$y$',title=r'Density $\rho$ ',
                 cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax,cmesh=cmap) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % (d.SimTime))
@@ -533,6 +533,22 @@ from the pdf. **Not yet working properly**
     print "Done sph_plot"
 
 
+def fig3_stone(ti,t_tot,N_snap):
+  """
+Plots figure 3 from stone
+:param ti: time for computation
+:param t_tot: total time of the simulation
+:param N_snap: total number of snapshots
+  """
+  frame = int(t_tot/(ti*N_snap))
+  d = Pluto(frame)
+
+  pylab.subplo(311)
+  pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
+  pylab.subplo(312)
+  pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
+  pylab.subplo(313)
+  pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
 
 
 ###################################################
