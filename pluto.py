@@ -549,6 +549,7 @@ Plots figure 3 from stone
   pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
   pylab.subplo(313)
   pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
+  pylab.show()
 
 
 ###################################################
