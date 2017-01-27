@@ -11,6 +11,7 @@ import matplotlib.pyplot as pylab
 from scipy import ndimage
 import multiprocessing as mp
 import scipy.interpolate
+from mpl_toolkits.mplot3d import Axes3D
 
 
 
@@ -281,10 +282,11 @@ Input: 2D simulation generated in any coordinates.
       pylab.clf()
       # Depending on the geometry, calls the appropriate function
       # to perform coordinate transformations
+      cmap = 'Oranges'
       if(d.geometry=='POLAR'):
-          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+          I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
                 label1='x',label2='$y$',title=r'Density $\rho$ ',
-                cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax) #polar automatic conversion =D
+                cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax,cmesh=cmap) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % (d.SimTime))
           #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
@@ -293,9 +295,9 @@ Input: 2D simulation generated in any coordinates.
           print ("Done i= %i" % self.frame)
 
       if(d.geometry=='SPHERICAL'):
-          I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+          I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
                 label1='R',label2='$z$',title=r'Density $\rho$ ',
-                cbar=(True,'vertical'),polar=[True,False],vmin=-5,vmax=rhomax) #polar automatic conversion =D
+                cbar=(True,'vertical'),polar=[True,False],vmin=-5,vmax=rhomax,cmesh=cmap) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{max}$ = %.3f" % numpy.max(self.pp.rho))
           #pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
@@ -304,9 +306,9 @@ Input: 2D simulation generated in any coordinates.
           pylab.tight_layout()
           print "Done i= %i" % self.frame
       else:
-         I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+         I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
                      label1='r',label2='$\phi$',lw=lw,title=r'Density $\rho$ [Torus]',
-                cbar=(True,'vertical'),vmin=-9,vmax=0) #polar automatic conversion =D
+                cbar=(True,'vertical'),vmin=-9,vmax=0,cmesh=cmap) #polar automatic conversion =D
          obj = self.cart(n,lim)
 #         self.plot_grid()
          pylab.title("t = %.2f" % d.SimTime)
@@ -472,7 +474,7 @@ from the pdf. **Not yet working properly**
     d = stone_fig5(Ni,Nf)
     # opening angle (theta) in degrees that will be used to make averaging
     # around the equator
-    n = 5
+    n = 4
     thmin = (90-n) * numpy.pi / 180.
     thmax = (90+n) * numpy.pi / 180.
     dpi = 400
@@ -500,26 +502,26 @@ from the pdf. **Not yet working properly**
         vphp[i] = numpy.sum(vph)
         vradp[i] = numpy.sum(vrad)
     ######Density#######
-    generic_plot(d.x1,numpy.log10(rhop),subplt=221,xlabel="Radius",
-                ylabel="$\\rho$",xlim=[0.01,1],ylim=[0.1,1],xscale='log',
+    generic_plot(d.x1,rhop,subplt=221,xlabel="Radius",
+                ylabel="$\\rho$",xlim=None,ylim=None,xscale='log',
                 yscale='log',color='b')
     if(files != None):
         pylab.plot(files[0].T[0],files[0].T[1],'k')
     ######Pressure#######
-    generic_plot(d.x1,numpy.log10(prsp),subplt=222,xlabel="Radius",
-                ylabel="$P$",xlim=[0.01,1],ylim=[0.01,10],xscale='log',
+    generic_plot(d.x1,prsp,subplt=222,xlabel="Radius",
+                ylabel="$P$",xlim=None,ylim=None,xscale='log',
                 yscale='log',color='b')
     if(files != None):
         pylab.plot(files[1].T[0],files[1].T[1],'k')
     ######Radial Velocity#######
-    generic_plot(d.x1,numpy.abs(vradp),subplt=223,xlabel="Radius",
-                ylabel="$v_r$",xlim=None,ylim=None,xscale='log',
+    generic_plot(d.x1,vphp,subplt=223,xlabel="Radius",
+                ylabel="$v_\\phi$",xlim=[0.01,1],ylim=None,xscale='log',
                 yscale='log',color='b')
     if(files != None):
         pylab.plot(files[2].T[0],files[2].T[1],'k')
     ######Angular Velocity#######
-    generic_plot(d.x1,numpy.abs(vphp),subplt=224,xlabel="Radius",
-                ylabel="$v_\\phi$",xlim=[0.01,1],ylim=[0.01,1],xscale='log',
+    generic_plot(d.x1,numpy.abs(vradp),subplt=224,xlabel="Radius",
+                ylabel="abs$(v_r)$",xlim=[0.01,10],ylim=[0.01,1],xscale='log',
                 yscale='log',color='b')
     if(files != None):
         pylab.plot(files[3].T[0],files[3].T[1],'k')
@@ -605,23 +607,38 @@ def contour_plot(args):
     del D
 
 def run_fig2(Rb,Nf,t_tot):
-    Njump = 1
-    R = numpy.zeros(Nf+1)
+    Njump = 4
+    File = open("mdot_data.dat",'w')
+    Mdot = numpy.zeros(Nf+1)
+    Mdot5 = numpy.zeros(Nf+1)
+    Mdot10 = numpy.zeros(Nf+1)
     t = numpy.zeros(Nf+1)
     Rfin=0
-    for i in range(Nf+1):
+    for i in range(Nf):
         if(i%Njump == 0):
             pp = Pluto(i)
             if(i==0):
                 print pp.rho.sum()
-            X,Y = numpy.meshgrid(pp.x2,pp.x1)
-            M = numpy.abs(-2*numpy.pi*Rb**2 *X*pp.rho*pp.v1*Y*numpy.sin(Y)*abs(pp.x2[0]-pp.x2[1]))
-            R[i] = numpy.sum(M[:,0])
+            X,Y = numpy.meshgrid(pp.x1,pp.x2) # X == r, Y == theta
+            M = numpy.abs(2*numpy.pi*X*X)
+            M *= numpy.abs(pp.rho*pp.v1)
+            M *=  numpy.abs(numpy.sin(Y)*abs(pp.x2[0]-pp.x2[1]))
+            stop
+            Mdot[i] = numpy.sum(M[0,:])
+            k = search(5*Rb,pp.x1)
+            Mdot5[i] = numpy.sum(M[k,:])
+            k = search(10*Rb,pp.x1)
+            Mdot10[i] = numpy.sum(M[k,:])
             t[i] = pp.pp.SimTime / (2*numpy.pi)
+            File.write(str(t[i]) + " " +str(Mdot[i]) + " " +str(Mdot5[i]) + " " +str(Mdot10[i]) + "\n")
             if(pp.pp.SimTime > (t_tot-2*numpy.pi)):
-                Rfin += R[i]
+                Rfin += Mdot[i]
     #pylab.plot(numpy.linspace(0,t/(2*numpy.pi),Nf/Njump + 1),R,'k')
-    pylab.plot(t,R,'k')
+    #data = numpy.loadtxt("mdot_data.dat")
+    #t,Mdot,Mdot5,Mdot10 = data[0].T,data[1].T,data[2].T,data[3].T
+    pylab.plot(t,Mdot,'k.')
+    pylab.plot(t,Mdot5,'r.')
+    pylab.plot(t,Mdot10,'b.')
     pylab.yscale('log')
     pylab.xlabel("Orbits")
     pylab.ylabel("Mdot")
