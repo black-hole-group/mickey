@@ -541,7 +541,7 @@ Plots figure 3 from stone
 :param N_snap: total number of snapshots
   """
   frame = int(t_tot/(ti*N_snap))
-  #d = Pluto(frame)
+  d = Pluto(frame)
 
   I = pp.Image()
   xx,yy = I.getPolarData(d.pp,d.pp.x2)
