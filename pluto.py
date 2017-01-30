@@ -285,7 +285,7 @@ Input: 2D simulation generated in any coordinates.
       cmap = 'Oranges'
       if(d.geometry=='POLAR'):
           I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
-                ≤label1='x',label2='$y$',title=r'Density $\rho$ ',
+                label1='x',label2='$y$',title='Density $\rho$ ',
                 cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax,cmesh=cmap) #polar automatic conversion =D
           #obj = self.pol2cart(n,lim)
           pylab.title("t = %.2f" % (d.SimTime))
@@ -306,24 +306,24 @@ Input: 2D simulation generated in any coordinates.
           pylab.tight_layout()
           print "Done i= %i" % self.frame
       else:
-         I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
+        I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
                      label1='r',label2='$\phi$',lw=lw,title=r'Density $\rho$ [Torus]',
                 cbar=(True,'vertical'),vmin=-9,vmax=0,cmesh=cmap) #polar automatic conversion =D
-         obj = self.cart(n,lim)
+        obj = self.cart(n,lim)
 #         self.plot_grid()
-         pylab.title("t = %.2f" % d.SimTime)
-         if stream == 'y':
+        pylab.title("t = %.2f" % d.SimTime)
+        if stream == 'y':
             if(mag == 'y'):
                 pylab.streamplot(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
             else:
                 pylab.streamplot(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
-         else:
+        else:
             if(mag == 'y'):
                 pylab.quiver(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
             else:
                 pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
-         pylab.xlim(self.x1.min(),2*lim)
-         pylab.ylim(-lim,lim)
+        pylab.xlim(self.x1.min(),2*lim)
+        pylab.ylim(-lim,lim)
       if hor!=None:
          circle=pylab.Circle((0,0),hor,color='b')
          pylab.gca().add_artist(circle)
@@ -541,15 +541,19 @@ Plots figure 3 from stone
 :param N_snap: total number of snapshots
   """
   frame = int(t_tot/(ti*N_snap))
-  d = Pluto(frame)
+  #d = Pluto(frame)
+  d = Pluto(54)
 
-  pylab.subplo(311)
-  pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
-  pylab.subplo(312)
-  pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
-  pylab.subplo(313)
-  pylab.pcolormesh(d.x1,d.x2,d.rho,cmap="Oranges")
+
+  pylab.subplot(131)
+  pylab.pcolormesh(d.x1,d.x2,numpy.transpose(numpy.log10(d.rho)),cmap="Oranges")
+  pylab.axis([0,2,1,2])
+  pylab.subplot(132)
+  pylab.pcolormesh(d.x2,d.x1,numpy.log10(d.rho),cmap="Oranges")
+  pylab.subplot(133)
+  pylab.pcolormesh(d.x2,d.x1,numpy.log10(d.rho),cmap="Oranges")
   pylab.show()
+  pylab.clf()
 
 
 ###################################################
