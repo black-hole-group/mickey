@@ -542,16 +542,38 @@ Plots figure 3 from stone
   """
   frame = int(t_tot/(ti*N_snap))
   #d = Pluto(frame)
-  d = Pluto(54)
 
-
+  I = pp.Image()
+  xx,yy = I.getPolarData(d.pp,d.pp.x2)
+  gamma = 5./3
   pylab.subplot(131)
-  pylab.pcolormesh(d.x1,d.x2,numpy.transpose(numpy.log10(d.rho)),cmap="Oranges")
-  pylab.axis([0,2,1,2])
+  var = numpy.transpose(numpy.log10(d.rho))
+  pylab.pcolormesh(xx,yy,var,cmap="Oranges")
+  pylab.axis([0,2,-1,1])
   pylab.subplot(132)
-  pylab.pcolormesh(d.x2,d.x1,numpy.log10(d.rho),cmap="Oranges")
+  var = numpy.transpose(numpy.log(d.p/(d.rho**gamma)))
+  pylab.pcolormesh(xx,yy,var,cmap="Oranges")
+  pylab.axis([0,2,-1,1])
+  pylab.tick_params(
+    axis='y',          # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    left='off',      # ticks along the bottom edge are off
+    right='off',         # ticks along the top edge are off
+    labelleft='off') # labels along the bottom edge are off
   pylab.subplot(133)
-  pylab.pcolormesh(d.x2,d.x1,numpy.log10(d.rho),cmap="Oranges")
+  var = numpy.copy(d.rho)
+  for i in range(d.n1):
+    for j in range(d.n2):
+      var[i,j] = d.rho[i,j] * (d.v2[i,j]*xx[j,i] - numpy.sqrt(xx[j,i]))
+  var = numpy.transpose(var)
+  pylab.pcolormesh(xx,yy,var,cmap="Oranges")
+  pylab.axis([0,2,-1,1])
+  pylab.tick_params(
+    axis='y',          # changes apply to the x-axis
+    which='both',      # both major and minor ticks are affected
+    left='off',      # ticks along the bottom edge are off
+    right='off',         # ticks along the top edge are off
+    labelleft='off') # labels along the bottom edge are off
   pylab.show()
   pylab.clf()
 
