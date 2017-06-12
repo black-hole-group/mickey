@@ -318,10 +318,12 @@ class Pluto:
 		# right now, this is only valid for polar 2d sims
 
 		# arrays convenient for vectorization
-		r,phi = numpy.meshgrid(self.x1,self.x2)
-		dr,dphi = numpy.meshgrid(self.dx1,self.dx2)
+		r,th = numpy.meshgrid(self.x1,self.x2)
+		dr,dth = numpy.meshgrid(self.dx1,self.dx2)
 
-		dmdot=2.*r.T**2*self.rho*self.v1*dphi.T
+		#x=2.*pi*d['rho'][2,:]*d['x1'][2]**2*sin(d['x2'])*d['v1'][2,:]*d['dx2']
+		dmdot=2.*numpy.pi*self.rho*r.T**2*numpy.sin(th)*self.v1*dth.T
+
 		self.mdot=dmdot.sum(1) # sums along phi axis
 
 
