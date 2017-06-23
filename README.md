@@ -2,6 +2,8 @@ PLUTO Tools
 ============
 
 Assorted methods and classes to handle and visualize the output of the PLUTO MHD code.
+
+# Simple examples 
 	
 #### To read the simulation output for snapshot 10 (e.g. rho.0010.dbl etc):
 	
@@ -58,8 +60,13 @@ This will create two movie files -- movie.avi and movie.mov (OS X compatible) --
 
 #### More examples coming soon.
 
+# Full torus simulation and analysis
+
+Please see Jupyter notebook `torus_tutorial.ipynb`.
+
 # TODO
 
 - [ ] compute total mass in volume
 - [ ] compute Mdot for a given radius
 - [ ] compute energy, a.m. 
+

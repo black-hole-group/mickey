@@ -1,0 +1,12 @@
+USER           = unknown
+WORKING_DIR    = /home/hgubolin/Documents/python_clones/pluto-tools
+SYSTEM_NAME    = Linux
+NODE_NAME      = B306-PC-nemmen
+RELEASE        = 4.4.0-43-generic
+ARCH           = x86_64
+BYTE_ORDER     = little
+VERSION        = #63-Ubuntu SMP Wed Oct 12 13:48:03 UTC 2016
+PLUTO_DIR      = /home/hgubolin/.pluto
+PLUTO_VERSION  = "4.2"
+C_COMPILER     = gcc
+MPI_C_COMPILER = mpicc
