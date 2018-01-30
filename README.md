@@ -1,7 +1,9 @@
-PLUTO Tools
-============
+Mickey: Python scripts to tame Pluto
+=======================================
 
-Assorted methods and classes to handle and visualize the output of the PLUTO MHD code.
+![](http://www.queen-of-theme-party-games.com/images/mickey-mouse-party-ideas-21678345.gif) 
+
+Assorted methods and classes to handle and visualize the output of the [Pluto MHD code](https://github.com/black-hole-group/pluto).
 
 # Simple examples 
 	
