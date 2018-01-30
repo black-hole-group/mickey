@@ -71,4 +71,6 @@ Please see Jupyter notebook `torus_tutorial.ipynb`.
 - [ ] compute total mass in volume
 - [ ] compute Mdot for a given radius
 - [ ] compute energy, a.m. 
+- [ ] compute how much mass was lost from the volume due to outflows
+- [ ] script to mirror local files to `alphacrucis`, for easy compilation
 
