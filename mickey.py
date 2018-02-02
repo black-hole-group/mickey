@@ -258,7 +258,7 @@ class Pluto:
 		try:
 			f = open("pluto.ini","r")
 		except IOError as e: 
-			print e
+			print(e)
 
 		for line in f:
 		    if 'GAMMA' in line:
@@ -285,12 +285,12 @@ class Pluto:
 		rho=[]	# unique values of rho
 		p=[]	# unique corresponding values of P 
 		# orders arrays of simulation (which have repeated values)
-		i=nemmen.sortindex(self.rho.flatten())
+		i=nmmn.sortindex(self.rho.flatten())
 		rhosim=self.rho.flatten()[i]
 		psim=self.p.flatten()[i]
 		# after this loop, you will get arrays with unique elements
 		for j,x in enumerate(rhosim):
-		  	if x not in rho:
+			if x not in rho:
 				rho.append(x)
 				p.append(psim[j])
 
