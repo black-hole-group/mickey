@@ -248,7 +248,7 @@ class Pluto:
 		self.mach=self.speed/self.cs
 
 		# accretion rates
-		self.getmdot()	# => self.mdot
+		#self.getmdot()	# => self.mdot
 
 
 	def getgamma(self):
@@ -327,7 +327,7 @@ class Pluto:
 
 	
 
-	def snap(self,var=None,hor=None):
+	def snap(self,var=None,hor=None,rhomax=None,lim=None):
 		"""
 Renders the density field for a given frame.
 Input: 2D simulation generated in any coordinates.
@@ -348,7 +348,13 @@ Input: 2D simulation generated in any coordinates.
 		lw = 5*self.speed/self.speed.max()
 		I = pp.Image()
 
+		# should we fix the max density? Useful for animations to avoid the spurious
+		# flickering effect
+		if rhomax is None:
+			rhomax=self.rho.max()
+
 		pylab.clf()
+
 		# Depending on the geometry, calls the appropriate function
 		# to perform coordinate transformations
 		cmap = 'Oranges'
@@ -359,8 +365,9 @@ Input: 2D simulation generated in any coordinates.
 				#obj = self.pol2cart(n,lim)
 				pylab.title("t = %.2f" % (d.SimTime))
 				#pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
-				pylab.xlim(-lim,lim)
-				pylab.ylim(-lim,lim)
+				if lim is not None:
+					pylab.xlim(-lim,lim)
+					pylab.ylim(-lim,lim)
 				print ("Done i= %i" % self.frame)
 
 		if(d.geometry=='SPHERICAL'):
@@ -368,10 +375,12 @@ Input: 2D simulation generated in any coordinates.
 							label1='R',label2='$z$',title=r'Density $\rho$ ',
 							cbar=(True,'vertical'),polar=[True,False],vmin=-5,vmax=rhomax,cmesh=cmap) #polar automatic conversion =D
 				#obj = self.pol2cart(n,lim)
-				pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{max}$ = %.3f" % numpy.max(self.pp.rho))
+				pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{\\rm max}$ = %.3f" % numpy.max(self.pp.rho))
 				#pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
-				pylab.xlim(0,2*lim)
-				pylab.ylim(-lim,lim)
+				if lim is not None:
+					pylab.xlim(0,2*lim)
+					pylab.ylim(-lim,lim)
+
 				pylab.tight_layout()
 				print("Done i= %i" % self.frame)
 		else:
@@ -391,10 +400,13 @@ Input: 2D simulation generated in any coordinates.
 							pylab.quiver(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
 					else:
 							pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
-			pylab.xlim(self.x1.min(),2*lim)
-			pylab.ylim(-lim,lim)
+
+			if lim is not None:
+				pylab.xlim(self.x1.min(),2*lim)
+				pylab.ylim(-lim,lim)
+
 		if hor!=None:
-			 circle=pylab.Circle((0,0),hor,color='b')
+			 circle=pylab.Circle((0,0),hor,color='k')
 			 pylab.gca().add_artist(circle)
 		#pylab.streamplot(self.x1,self.x2,self.v2,self.v1,color='k')
 
@@ -471,6 +483,11 @@ into a uniform grid in the same coordinates.
 			obj.v1,obj.v2 = vx,vy
 
 			return obj
+
+
+
+
+
 
 	def contours(self,N,lim,plot_flag='y'):
 				"""
