@@ -7,13 +7,13 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='nmmn',
-    version='0.2',
-    description='Miscellaneous methods for astronomy, dealing with arrays, statistical distributions and computing goodness-of-fit',
+    name='mickey',
+    version='0.1',
+    description='Assorted methods and classes to handle and visualize the output of the Pluto MHD code',
     long_description=readme,
     author='Rodrigo Nemmen',
     author_email='rodrigo.nemmen@iag.usp.br',
-    url='https://github.com/rsnemmen/nemmen',
+    url='https://bitbucket.org/nemmen/mickey',
     license=license,
     packages=find_packages(exclude=('tests', 'docs'))
 )
