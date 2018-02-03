@@ -4,7 +4,6 @@ Methods to read and visualize PLUTO's output.
 
 
 import pyPLUTO as pp
-#import pylab, numpy
 import numpy
 import os
 import matplotlib.pyplot as pylab
@@ -43,52 +42,6 @@ def movie(fname="movie.avi"):
 			volume(i)
 			#snap(i)
 			peixe.animate(amount=i)
-
-
-
-def search(xref, x):
-	 """
-Search for the element in an array x with the value nearest xref.
-Piece of code based on http://stackoverflow.com/questions/2566412/find-nearest-value-in-numpy-array
-
->>> i=search(xref, x)
-
-:param xref: input number, array or list of reference values
-:param x: input array
-:returns: index of the x-elements with values nearest to xref:
-	 """
-	 if numpy.size(xref)==1:
-			i=(numpy.abs(x-xref)).argmin()
-	 else:
-			i=[]
-
-			for y in xref:
-				 i.append( (numpy.abs(x-y)).argmin() )
-
-	 return i
-
-
-def pol2cart(r, phi):
-	 """
-Converts from polar to cartesian coordinates.
-
->>> x,y=pol2cart(r,phi)
-	 """
-	 x = r * numpy.cos(phi)
-	 y = r * numpy.sin(phi)
-	 return x, y
-
-
-def cart2pol(x, y):
-	 """
-Converts from cartesian to polar coordinates.
-
->>> r,t=cart2pol(x,y)
-	 """
-	 r = numpy.sqrt(x**2 + y**2)
-	 #t = numpy.arctan2(y, x)
-	 t = numpy.arctan2(x, y)
-	 return r, t
 
 
 
@@ -199,8 +152,8 @@ class Pluto:
 	
 	To read the simulation output for frame 10:
 	
-	>>> import pluto
-	>>> p=pluto.Pluto(10)
+	>>> import mickey
+	>>> p=mickey.Pluto(10)
 	
 	Plots density field:
 	
@@ -278,6 +231,8 @@ class Pluto:
 	3. Gets the derivative dP/drho
 	4. Computes the cs array
 		"""
+		import nmmn.lsd
+
 		# P=P(rho), 
 		# i.e. gives you the pressure as a function of density
 		# =====================
@@ -285,7 +240,7 @@ class Pluto:
 		rho=[]	# unique values of rho
 		p=[]	# unique corresponding values of P 
 		# orders arrays of simulation (which have repeated values)
-		i=nmmn.sortindex(self.rho.flatten())
+		i=nmmn.lsd.sortindex(self.rho.flatten())
 		rhosim=self.rho.flatten()[i]
 		psim=self.p.flatten()[i]
 		# after this loop, you will get arrays with unique elements
@@ -327,7 +282,7 @@ class Pluto:
 
 	
 
-	def snap(self,var=None,hor=None,rhomax=None,lim=None):
+	def snap(self,var=None,hor=None,rhomax=None,lim=None,stream=False,mag=False):
 		"""
 Renders the density field for a given frame.
 Input: 2D simulation generated in any coordinates.
@@ -390,13 +345,13 @@ Input: 2D simulation generated in any coordinates.
 			obj = self.cart(n,lim)
 #         self.plot_grid()
 			pylab.title("t = %.2f" % d.SimTime)
-			if stream == 'y':
-					if(mag == 'y'):
+			if stream == True:
+					if(mag == True):
 							pylab.streamplot(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
 					else:
 							pylab.streamplot(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
 			else:
-					if(mag == 'y'):
+					if(mag == True):
 							pylab.quiver(obj.x1,obj.x2,obj.bx1,obj.bx2,color='k')
 					else:
 							pylab.quiver(obj.x1,obj.x2,obj.v1,obj.v2,color='k')
@@ -428,6 +383,8 @@ into a uniform grid in the same coordinates.
 :param rhocut: Variable used if you want to put a lower limit to the contours
 
 			"""
+			import nmmn.lsd, nmmn.misc
+
 			# creates copy of current object which will have the new
 			# coordinates
 			obj=Pluto(-1) #null pluto object
@@ -456,10 +413,10 @@ into a uniform grid in the same coordinates.
 			for i in range(xnew.size):
 				for j in range(ynew.size):
 						if(gmrty == "SPHERICAL" or gmrty == "CYLINDRICAL"):
-								rnew,thnew=cart2pol(xnew[i],ynew[j])
+								rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
 								# position in old array
-								iref=search(rnew, r)
-								jref=search(thnew, th)
+								iref=nmmn.lsd.search(rnew, r)
+								jref=nmmn.lsd.search(thnew, th)
 								if(self.rho[iref,jref] < rhocut): #for contours with a low limit
 									 rho[i,j] = rhocut
 								else:
@@ -470,8 +427,8 @@ into a uniform grid in the same coordinates.
 
 						else: #polar case for bondi
 								# position in old array
-								iref=search(xnew[i], r)
-								jref=search(ynew[j], th)
+								iref=nmmn.lsd.search(xnew[i], r)
+								jref=nmmn.lsd.search(ynew[j], th)
 								rho[i,j]=self.rho[iref,jref]
 								p[i,j]=self.p[iref,jref]
 								vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
