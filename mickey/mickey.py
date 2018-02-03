@@ -297,6 +297,8 @@ into a uniform grid in the same coordinates.
 
 :param n: New number of elements n^2. If None, figures out by itself
 :param xlim: Boundary for the plot and the grid
+
+.. todo:: speed this up with C--loops slow it down.
 			"""
 			import nmmn.lsd, nmmn.misc
 
@@ -349,6 +351,9 @@ into a uniform grid in the same coordinates.
 			obj.x1,obj.x2=xnew,ynew
 			obj.rho,obj.p=rho,p
 			obj.v1,obj.v2 = vx,vy
+			obj.regridded=True # flag to tell whether the object was previously regridded
+			obj.t=self.t
+			obj.frame=self.frame
 
 			return obj
 
