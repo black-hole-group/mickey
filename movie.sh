@@ -4,6 +4,12 @@
 #
 # Usage: mencoder.sh <fps> <output file basename>
 # 	e.g. mencoder.sh 5 movie
+#
+# Requirements:
+# 
+# • mencoder
+# • ffmpeg
+#
 
 bitrate=900
 

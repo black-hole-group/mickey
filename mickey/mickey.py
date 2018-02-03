@@ -61,6 +61,8 @@ class Pluto:
 	- rho
 	- n1,n2,n3
 
+	To supress the message when reading a binary file, use stdout=False.
+
 	
 	To read the simulation output for frame 10:
 	

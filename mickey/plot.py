@@ -1,12 +1,17 @@
 import pylab
 import numpy
 
-def density(obj,lim=None, bh=None, file=False, n=None):
+def density(obj,lim=None, bh=None, file=False, n=None, *arg, **args):
     """
-Plots the density scalar field for a Pluto simulation.
+Plots the density scalar field for a Pluto simulation. Offers several options
+for convenience. 
 
 :param obj: pluto object created with Mickey, storing the arrays for the simulation you want to visualize
-:param lim: specify bounding box for plot as [radius,color string], e.g. [1,'w']
+:param lim: specify bounding box for plot 
+:param bh: plots circle centered on the origin to illustrate the inner boundary. Can be specified as either a float or a list [float,string] ([radius,color string], e.g. [1,'w'])
+:param file: should we output a graphic file with the plot?
+:param n: number of cartesian grid points per dimension, total number of points = n^2 
+:param vmax: cuts the upper value displayed in the image to vmax. Useful when creating a movie, to avoid the flickering effect
     """
     # gets arrays in a cartesian grid, stored in a new object p
     if hasattr(obj, 'regridded'):
@@ -18,7 +23,7 @@ Plots the density scalar field for a Pluto simulation.
             p=obj.regrid(n)
         
     pylab.clf()
-    pylab.imshow(numpy.log10(p.rho),extent=[p.x1[0],p.x1[-1],p.x2[0],p.x2[-1]]) #vmin=-6, vmax=0)
+    pylab.imshow(numpy.log10(p.rho),extent=[p.x1[0],p.x1[-1],p.x2[0],p.x2[-1]], *arg, **args)
 
     if lim is not None:
         pylab.xlim(0,2*lim)
@@ -37,7 +42,7 @@ Plots the density scalar field for a Pluto simulation.
             circle2=pylab.Circle((0,0),bh,color='k')
         else:
             circle2=pylab.Circle((0,0),bh[0],color=bh[1])
-            
+
         pylab.gca().add_artist(circle2)
     
     if file is True:
