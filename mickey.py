@@ -160,48 +160,51 @@ class Pluto:
 	>>> p.snap()
 	"""
 		
-	def __init__(self, i=0,gamma=1.66666,*arg,**args):
-		d=pp.pload(i,*arg,**args)
-		
-		# mesh,  and velocities
-		if d.n1>1: 
-			self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.dx1
-			self.speed=numpy.sqrt(self.v1*self.v1)
-		if d.n2>1: 
-			self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.dx2
-			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
-		if d.n3>1: 
-			self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
-			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
+	def __init__(self, i=None,gamma=1.66666,*arg,**args):
+		# if i is not given, then initialize an empty object
+		# otherwise read from the given frame number
+		if i is not None:
+			d=pp.pload(i,*arg,**args)
+			
+			# mesh,  and velocities
+			if d.n1>1: 
+				self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.dx1
+				self.speed=numpy.sqrt(self.v1*self.v1)
+			if d.n2>1: 
+				self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.dx2
+				self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
+			if d.n3>1: 
+				self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
+				self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
-		# pressure
-		self.p=d.prs
-		self.p_grad = numpy.gradient(d.prs)
-		# volume density
-		self.rho=d.rho 
-		self.rho_grad = numpy.gradient(d.rho)
-		# time
-		self.t=d.SimTime
+			# pressure
+			self.p=d.prs
+			self.p_grad = numpy.gradient(d.prs)
+			# volume density
+			self.rho=d.rho 
+			self.rho_grad = numpy.gradient(d.rho)
+			# time
+			self.t=d.SimTime
 
-		# misc. info
-		self.pp =d # pypluto object
-		self.frame=i
-		self.vars=d.vars
-		self.geometry=d.geometry
+			# misc. info
+			self.pp =d # pypluto object
+			self.frame=i
+			self.vars=d.vars
+			self.geometry=d.geometry
 
-		# sound speed
-		self.getgamma() # gets value of adiabatic index
-		#self.soundspeed() # computes numerical cs (no need to specify EoS)
-		self.cs=numpy.sqrt(self.gamma*self.p/self.rho)
+			# sound speed
+			self.getgamma() # gets value of adiabatic index
+			#self.soundspeed() # computes numerical cs (no need to specify EoS)
+			self.cs=numpy.sqrt(self.gamma*self.p/self.rho)
 
-		# mach number
-		if d.n1>1: self.mach1=self.v1/self.cs
-		if d.n2>1: self.mach2=self.v2/self.cs
-		if d.n3>1: self.mach3=self.v3/self.cs
-		self.mach=self.speed/self.cs
+			# mach number
+			if d.n1>1: self.mach1=self.v1/self.cs
+			if d.n2>1: self.mach2=self.v2/self.cs
+			if d.n3>1: self.mach3=self.v3/self.cs
+			self.mach=self.speed/self.cs
 
-		# accretion rates
-		#self.getmdot()	# => self.mdot
+			# accretion rates
+			#self.getmdot()	# => self.mdot
 
 
 	def getgamma(self):
@@ -375,12 +378,12 @@ Input: 2D simulation generated in any coordinates.
 
 
 
-	def regrid(self, n=200, xlim = None):
+	def regrid(self, n=None, xlim = None):
 			"""
 Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
 into a uniform grid in the same coordinates.
 
-:param n: New number of elements n^2.
+:param n: New number of elements n^2. If None, figures out by itself
 :param xlim: Boundary for the plot and the grid
 			"""
 			import nmmn.lsd, nmmn.misc
@@ -395,12 +398,17 @@ into a uniform grid in the same coordinates.
 					xlim = self.x1.max()
 			gmtry = self.pp.geometry
 
+			# figures out size of cartesian grid
+			if n is None:
+				n=sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+				n=int(n)
+
 			if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
-					xnew=numpy.linspace(0, xlim, n)
-					ynew=numpy.linspace(-xlim, xlim, n)
+				xnew=numpy.linspace(0, xlim, n)
+				ynew=numpy.linspace(-xlim, xlim, n)
 			else:
-					xnew=numpy.linspace(-xlim, xlim, n)
-					ynew=numpy.linspace(-xlim, xlim, n)
+				xnew=numpy.linspace(-xlim, xlim, n)
+				ynew=numpy.linspace(-xlim, xlim, n)
 
 			rho=numpy.zeros((n,n))
 			vx=numpy.zeros((n,n))
@@ -415,13 +423,11 @@ into a uniform grid in the same coordinates.
 								# position in old array
 								iref=nmmn.lsd.search(rnew, r)
 								jref=nmmn.lsd.search(thnew, th)
-								if(self.rho[iref,jref] < rhocut): #for contours with a low limit
-									 rho[i,j] = rhocut
-								else:
-									 rho[j,i]=self.rho[iref,jref]
+
+								rho[j,i]=self.rho[iref,jref]
 								p[j,i]=self.p[iref,jref]
-								vx[j,i]=self.v1[iref,jref]
-								vy[j,i]=self.v1[iref,jref]
+								vx[j,i]=self.speed[iref,jref]*numpy.cos(thnew)
+								vy[j,i]=self.speed[iref,jref]*numpy.sin(thnew)
 
 						else: #polar case for bondi
 								# position in old array
