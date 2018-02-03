@@ -283,7 +283,7 @@ Input: 2D simulation generated in any coordinates.
 			 pylab.gca().add_artist(circle)
 		#pylab.streamplot(self.x1,self.x2,self.v2,self.v1,color='k')
 
-		pylab.tight_layout()
+		#pylab.tight_layout()
 
 		if file is True:
 			pylab.savefig('plot.'+str(self.frame)+'.png',dpi=400)
