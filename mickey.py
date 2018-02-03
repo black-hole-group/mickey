@@ -390,17 +390,18 @@ into a uniform grid in the same coordinates.
 
 			# creates copy of current object which will have the new
 			# coordinates
-			obj=Pluto(-1) #null pluto object
+			obj=Pluto() # empty pluto object
 
 			# r, theta
-			r,th=self.x1,self.x2
+			r=self.x1
+			th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
 			if(xlim == None):
 					xlim = self.x1.max()
 			gmtry = self.pp.geometry
 
 			# figures out size of cartesian grid
 			if n is None:
-				n=sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+				n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
 				n=int(n)
 
 			if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
@@ -418,7 +419,7 @@ into a uniform grid in the same coordinates.
 			# goes through new array
 			for i in range(xnew.size):
 				for j in range(ynew.size):
-						if(gmrty == "SPHERICAL" or gmrty == "CYLINDRICAL"):
+						if(gmtry == "SPHERICAL"):
 								rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
 								# position in old array
 								iref=nmmn.lsd.search(rnew, r)
