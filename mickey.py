@@ -282,7 +282,7 @@ class Pluto:
 
 	
 
-	def snap(self,var=None,hor=None,rhomax=None,lim=None,stream=False,mag=False):
+	def snap(self,var=None,hor=None,rhomax=None,lim=None,stream=False,mag=False,file=False):
 		"""
 Renders the density field for a given frame.
 Input: 2D simulation generated in any coordinates.
@@ -314,6 +314,7 @@ Input: 2D simulation generated in any coordinates.
 		# to perform coordinate transformations
 		cmap = 'Oranges'
 		if(d.geometry=='POLAR'):
+				# here pldisplay does the cartesian conversion
 				I.pldisplay(d, numpy.log10(d.rho),x1=d.x1,x2=d.x2,
 							label1='x',label2='$y$',title='Density $\rho$ ',
 							cbar=(True,'vertical'),polar=[True,True],vmin=-9,vmax=rhomax,cmesh=cmap) #polar automatic conversion =D
@@ -366,8 +367,83 @@ Input: 2D simulation generated in any coordinates.
 		#pylab.streamplot(self.x1,self.x2,self.v2,self.v1,color='k')
 
 		pylab.tight_layout()
-		pylab.savefig('plot.'+str(self.frame)+'.png',dpi=400)
-#      pylab.show()
+
+		if file is True:
+			pylab.savefig('plot.'+str(self.frame)+'.png',dpi=400)
+
+
+
+
+
+	def regrid(self, n=200, xlim = None):
+			"""
+Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
+into a uniform grid in the same coordinates.
+
+:param n: New number of elements n^2.
+:param xlim: Boundary for the plot and the grid
+			"""
+			import nmmn.lsd, nmmn.misc
+
+			# creates copy of current object which will have the new
+			# coordinates
+			obj=Pluto(-1) #null pluto object
+
+			# r, theta
+			r,th=self.x1,self.x2
+			if(xlim == None):
+					xlim = self.x1.max()
+			gmtry = self.pp.geometry
+
+			if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
+					xnew=numpy.linspace(0, xlim, n)
+					ynew=numpy.linspace(-xlim, xlim, n)
+			else:
+					xnew=numpy.linspace(-xlim, xlim, n)
+					ynew=numpy.linspace(-xlim, xlim, n)
+
+			rho=numpy.zeros((n,n))
+			vx=numpy.zeros((n,n))
+			vy=numpy.zeros((n,n))
+			p=rho.copy()
+
+			# goes through new array
+			for i in range(xnew.size):
+				for j in range(ynew.size):
+						if(gmrty == "SPHERICAL" or gmrty == "CYLINDRICAL"):
+								rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
+								# position in old array
+								iref=nmmn.lsd.search(rnew, r)
+								jref=nmmn.lsd.search(thnew, th)
+								if(self.rho[iref,jref] < rhocut): #for contours with a low limit
+									 rho[i,j] = rhocut
+								else:
+									 rho[j,i]=self.rho[iref,jref]
+								p[j,i]=self.p[iref,jref]
+								vx[j,i]=self.v1[iref,jref]
+								vy[j,i]=self.v1[iref,jref]
+
+						else: #polar case for bondi
+								# position in old array
+								iref=nmmn.lsd.search(xnew[i], r)
+								jref=nmmn.lsd.search(ynew[j], th)
+								rho[i,j]=self.rho[iref,jref]
+								p[i,j]=self.p[iref,jref]
+								vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
+								vy[i,j]=self.v1[iref,jref] * numpy.sin(thnew)
+
+		#set new variables to null object
+			obj.x1,obj.x2=xnew,ynew
+			obj.rho,obj.p=rho,p
+			obj.v1,obj.v2 = vx,vy
+
+			return obj
+
+
+
+
+
+
 
 
 
@@ -381,7 +457,6 @@ into a uniform grid in the same coordinates.
 :param n: New number of elements n^2.
 :param xlim: Boundary for the plot and the grid
 :param rhocut: Variable used if you want to put a lower limit to the contours
-
 			"""
 			import nmmn.lsd, nmmn.misc
 
@@ -440,7 +515,6 @@ into a uniform grid in the same coordinates.
 			obj.v1,obj.v2 = vx,vy
 
 			return obj
-
 
 
 
