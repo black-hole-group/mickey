@@ -334,24 +334,18 @@ into a uniform grid in the same coordinates.
 			for i in range(xnew.size):
 				for j in range(ynew.size):
 						if(gmtry == "SPHERICAL"):
-								rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
-								# position in old array
-								iref=nmmn.lsd.search(rnew, r)
-								jref=nmmn.lsd.search(thnew, th)
+							rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
+							# position in old array
+							iref=nmmn.lsd.search(rnew, r)
+							jref=nmmn.lsd.search(thnew, th)
 
-								rho[j,i]=self.rho[iref,jref]
-								p[j,i]=self.p[iref,jref]
-								vx[j,i]=self.speed[iref,jref]*numpy.cos(thnew)
-								vy[j,i]=self.speed[iref,jref]*numpy.sin(thnew)
+							rho[j,i]=self.rho[iref,jref]
+							p[j,i]=self.p[iref,jref]
+							# careful with cartesian conversion for vectors
+							vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
 
 						else: #polar case for bondi
-								# position in old array
-								iref=nmmn.lsd.search(xnew[i], r)
-								jref=nmmn.lsd.search(ynew[j], th)
-								rho[i,j]=self.rho[iref,jref]
-								p[i,j]=self.p[iref,jref]
-								vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
-								vy[i,j]=self.v1[iref,jref] * numpy.sin(thnew)
+							print("Geometry not supported. Improve the method.")
 
 		#set new variables to null object
 			obj.x1,obj.x2=xnew,ynew
