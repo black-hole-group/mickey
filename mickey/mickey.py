@@ -8,9 +8,7 @@ import numpy
 import os
 import matplotlib.pyplot as pylab
 from scipy import ndimage
-import multiprocessing as mp
 import scipy.interpolate
-from mpl_toolkits.mplot3d import Axes3D
 
 
 
