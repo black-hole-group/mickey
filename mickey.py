@@ -48,92 +48,6 @@ def movie(fname="movie.avi"):
 
 
 
-#### 3d routines
-
-
-def cutplane(i):
-	 """
-Snapshot of 3d cartesian simulation, generating cut planes.
-
-i : index corresponding to frame you want to plot
-	 """
-	 import mayavi.mlab as mlab
-
-	 d=pp.pload(i)
-	 x1,x2,x3=d.x1,d.x2,d.x3
-	 v1,v2,v3=d.vx1,d.vx2,d.vx3
-	 p=d.prs
-	 rho=d.rho
-
-	 mlab.clf()
-	 #mlab.figure(size=(600,600))
-
-	 # volume rendering
-	 mp=mlab.pipeline.scalar_field(p)
-	 mrho=mlab.pipeline.scalar_field(rho)
-	 #mlab.pipeline.volume(mp)#,vmax=rho.max()/5.)
-
-	 # streamlines
-	 #flow = mlab.flow(v1, v2, v3, seed_scale=0.5, seed_resolution=8, integration_direction='both',seed_visible=False)
-
-	 # cut planes
-	 mlab.pipeline.image_plane_widget(mp, plane_orientation='y_axes', slice_index=100)
-	 mlab.pipeline.image_plane_widget(mp, plane_orientation='x_axes', slice_index=100)
-
-	 # move camera to appropriate distance
-	 dcam=mlab.view()[2] # distance of camera to center
-	 ##mlab.move(forward=dcam/2.)
-	 mlab.view(distance=dcam/2.)
-
-	 # saves snapshot
-	 mlab.savefig('plot.'+str(i)+'.jpeg',size=(800,800))
-
-
-
-
-def volume(i):
-	 """
-Volume rendering of 3d cartesian simulation.
-
-i : index corresponding to frame you want to plot
-	 """
-	 import mayavi.mlab as mlab
-
-	 d=pp.pload(i)
-	 x1,x2,x3=d.x1,d.x2,d.x3
-	 v1,v2,v3=d.vx1,d.vx2,d.vx3
-	 p=d.prs
-	 rho=d.rho
-
-	 mlab.clf()
-
-	 # volume rendering
-	 mp=mlab.pipeline.scalar_field(p)
-	 mrho=mlab.pipeline.scalar_field(rho)
-	 mlab.pipeline.volume(mp)#,vmax=rho.max()/5.)
-
-	 # streamlines
-	 #flow = mlab.flow(v1, v2, v3, seed_scale=0.5, seed_resolution=8, integration_direction='both',seed_visible=False)
-
-	 # cut planes
-	 #mlab.pipeline.image_plane_widget(mp, plane_orientation='y_axes', slice_index=100)
-	 #mlab.pipeline.image_plane_widget(mp, plane_orientation='x_axes', slice_index=100)
-
-	 # move camera to appropriate distance
-	 dcam=mlab.view()[2] # distance of camera to center
-	 ##mlab.move(forward=dcam/2.)
-	 mlab.view(distance=dcam/2.)
-
-	 # saves snapshot
-	 mlab.savefig('plot.'+str(i)+'.jpeg',size=(800,800))
-
-
-
-
-
-
-
-
 
 
 
@@ -458,6 +372,9 @@ into a uniform grid in the same coordinates.
 
 	def contour_newgrid(self, n=200, xlim = None,rhocut = None):
 			"""
+THIS IS BUGGY. KEPT HERE ONLY FOR FUTURE REFERENCE. WILL BE 
+EVENTUALLY DELETED.
+
 Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
 into a uniform grid in the same coordinates.
 
@@ -522,44 +439,6 @@ into a uniform grid in the same coordinates.
 			obj.v1,obj.v2 = vx,vy
 
 			return obj
-
-
-
-
-
-	def contours(self,N,lim,plot_flag='y'):
-				"""
-Function for contour plotting. It can plot also the density map,
-setting plot_flag to 'y'
-
-:param N: Size of grid
-:param lim: is the plot limit
-:param plot_flag: control the plot of the density map
-				"""
-				rhocut = None
-				if (self.pp.geometry == "SPHERICAL"):
-						rhocut = 5e-5
-				obj = self.contour_newgrid(N,lim,rhocut)
-				xi,yi,zi = obj.x1,obj.x2,numpy.log10(obj.rho)
-
-				#plot the density map
-				pylab.clf()
-				d = self.pp
-				if(plot_flag == 'y'):
-						I = pp.Image()
-						I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
-										label1='x',label2='$y$',title=r'Density $\rho$ ',
-										cbar=(True,'vertical'),polar=[True,False],cmap='YlOrBr',vmin=-4,vmax=0) #polar automatic conversion =D
-				#plot contour
-				pylab.rcParams['contour.negative_linestyle'] = 'solid' #set positive and negative contour as solid
-				pylab.contour(xi,yi,zi,20,colors='k')
-				pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{max}$ = %.3f" % numpy.max(self.pp.rho))
-				pylab.xlim(0,lim)
-				pylab.ylim(-lim/2.,lim/2.)
-
-				pylab.savefig("contour_plot"+str(self.frame)+".png",dpi=300)
-				pylab.clf()
-
 
 
 

@@ -2,6 +2,46 @@
 
 
 
+def contours(self,N,lim,plot_flag='y'):
+				"""
+		PROBABLY BUGGY. BE CAREFUL!
+
+Function for contour plotting. It can plot also the density map,
+setting plot_flag to 'y'
+
+:param N: Size of grid
+:param lim: is the plot limit
+:param plot_flag: control the plot of the density map
+"""
+	rhocut = None
+	if (self.pp.geometry == "SPHERICAL"):
+		rhocut = 5e-5
+		obj = self.contour_newgrid(N,lim,rhocut)
+		xi,yi,zi = obj.x1,obj.x2,numpy.log10(obj.rho)
+
+	#plot the density map
+	pylab.clf()
+	d = self.pp
+	if(plot_flag == 'y'):
+		I = pp.Image()
+		I.pldisplay(d, numpy.log(d.rho),x1=d.x1,x2=d.x2,
+			label1='x',label2='$y$',title=r'Density $\rho$ ',
+							cbar=(True,'vertical'),polar=[True,False],cmap='YlOrBr',vmin=-4,vmax=0) #polar automatic conversion =D
+	#plot contour
+	pylab.rcParams['contour.negative_linestyle'] = 'solid' #set positive and negative contour as solid
+	pylab.contour(xi,yi,zi,20,colors='k')
+	pylab.title("t = %.2f  " % (float(d.SimTime)/6.28318530717) + "$\\rho_{max}$ = %.3f" % numpy.max(self.pp.rho))
+	pylab.xlim(0,lim)
+	pylab.ylim(-lim/2.,lim/2.)
+
+	pylab.savefig("contour_plot"+str(self.frame)+".png",dpi=300)
+	pylab.clf()
+
+
+
+
+
+
 
 
 def generic_plot(X,Y,**kwargs):
