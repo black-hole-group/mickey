@@ -47,3 +47,42 @@ for convenience.
     
     if file is True:
         pylab.savefig('plot.'+str(obj.frame)+'.png',transparent=True,dpi=300)
+
+
+
+def mesh(obj):
+    """
+Plot the computational mesh grid.
+
+:param obj: pluto object created with Mickey, storing the arrays for the simulation you want to visualize
+    """
+    import nmmn.misc
+
+    # makes sure this is not a regridded object
+    if hasattr(obj, 'pp'): 
+        if obj.pp.geometry=='SPHERICAL':
+            # EXECUTE COMMAND ONLY FOR THE SUPPORTED GEOMETRY
+
+            theta=-(obj.x2-numpy.pi/2.) # spherical angle => polar angle
+            radius=obj.x1
+
+            for th in theta:
+                tt=th*numpy.ones_like(radius)
+                x,y=nmmn.misc.pol2cart(radius,tt)
+                pylab.plot(x,y,'gray')
+
+            for r in radius:
+                rr=r*numpy.ones_like(theta)
+                x,y=nmmn.misc.pol2cart(rr,theta)
+                pylab.plot(x,y,'gray')
+
+            pylab.xlabel('$x$')
+            pylab.ylabel('$y$')
+            pylab.axes().set_aspect('equal')
+    else:
+        print("Geometry not currently supported. Implement this.")
+
+
+
+
+

@@ -117,6 +117,10 @@ class Pluto:
 			if d.n3>1: self.mach3=self.v3/self.cs
 			self.mach=self.speed/self.cs
 
+			# convenient meshgrid arrays
+			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
+			self.DX1,self.DX2=numpy.meshgrid(self.dx1,self.dx2)
+
 			# accretion rates
 			#self.getmdot()	# => self.mdot
 
@@ -201,7 +205,8 @@ class Pluto:
 
 	def snap(self,var=None,hor=None,rhomax=None,lim=None,stream=False,mag=False,file=False):
 		"""
-Renders the density field for a given frame.
+Renders the density field for a given frame using pldisplay in pypluto.
+
 Input: 2D simulation generated in any coordinates.
 
 :param n: Number of uniform divisions in x and y for the quiver plot
@@ -300,7 +305,7 @@ into a uniform grid in the same coordinates.
 :param n: New number of elements n^2. If None, figures out by itself
 :param xlim: Boundary for the plot and the grid
 
-.. todo:: speed this up with C--loops slow it down.
+.. todo:: speed this up with C, the loops slow this down in python.
 			"""
 			import nmmn.lsd, nmmn.misc
 
@@ -356,88 +361,13 @@ into a uniform grid in the same coordinates.
 			obj.regridded=True # flag to tell whether the object was previously regridded
 			obj.t=self.t
 			obj.frame=self.frame
+			obj.speed=numpy.sqrt(vx*vx + vy*vy)
+			obj.X1,obj.X2=numpy.meshgrid(xnew,ynew)
 
 			return obj
 
 
 
-
-
-
-
-
-
-
-
-	def contour_newgrid(self, n=200, xlim = None,rhocut = None):
-			"""
-THIS IS BUGGY. KEPT HERE ONLY FOR FUTURE REFERENCE. WILL BE 
-EVENTUALLY DELETED.
-
-Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
-into a uniform grid in the same coordinates.
-
-:param n: New number of elements n^2.
-:param xlim: Boundary for the plot and the grid
-:param rhocut: Variable used if you want to put a lower limit to the contours
-			"""
-			import nmmn.lsd, nmmn.misc
-
-			# creates copy of current object which will have the new
-			# coordinates
-			obj=Pluto(-1) #null pluto object
-			if(rhocut == None):
-					rhocut = -1
-
-			# r, theta
-			r,th=self.x1,self.x2
-			if(xlim == None):
-					xlim = self.x1.max()
-			gmtry = self.pp.geometry
-
-			if(gmtry == "SPHERICAL" or smtry == "CYLINRICAL"):
-					xnew=numpy.linspace(0, xlim, n)
-					ynew=numpy.linspace(-xlim, xlim, n)
-			else:
-					xnew=numpy.linspace(-xlim, xlim, n)
-					ynew=numpy.linspace(-xlim, xlim, n)
-
-			rho=numpy.zeros((n,n))
-			vx=numpy.zeros((n,n))
-			vy=numpy.zeros((n,n))
-			p=rho.copy()
-
-			# goes through new array
-			for i in range(xnew.size):
-				for j in range(ynew.size):
-						if(gmrty == "SPHERICAL" or gmrty == "CYLINDRICAL"):
-								rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
-								# position in old array
-								iref=nmmn.lsd.search(rnew, r)
-								jref=nmmn.lsd.search(thnew, th)
-								if(self.rho[iref,jref] < rhocut): #for contours with a low limit
-									 rho[i,j] = rhocut
-								else:
-									 rho[j,i]=self.rho[iref,jref]
-								p[j,i]=self.p[iref,jref]
-								vx[j,i]=self.v1[iref,jref]
-								vy[j,i]=self.v1[iref,jref]
-
-						else: #polar case for bondi
-								# position in old array
-								iref=nmmn.lsd.search(xnew[i], r)
-								jref=nmmn.lsd.search(ynew[j], th)
-								rho[i,j]=self.rho[iref,jref]
-								p[i,j]=self.p[iref,jref]
-								vx[i,j]=self.v1[iref,jref] * numpy.cos(thnew)
-								vy[i,j]=self.v1[iref,jref] * numpy.sin(thnew)
-
-		#set new variables to null object
-			obj.x1,obj.x2=xnew,ynew
-			obj.rho,obj.p=rho,p
-			obj.v1,obj.v2 = vx,vy
-
-			return obj
 
 
 
