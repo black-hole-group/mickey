@@ -67,11 +67,9 @@ class Pluto:
 	To read the simulation output for frame 10:
 	
 	>>> import mickey
-	>>> p=mickey.Pluto(10)
+	>>> p=mickey.mickey.Pluto(10)
 	
-	Plots density field:
-	
-	>>> p.snap()
+	:param stdout: if False, suppresses message mentioning the file that was processed
 	"""
 		
 	def __init__(self, i=None,gamma=1.66666,*arg,**args):
@@ -217,10 +215,6 @@ Input: 2D simulation generated in any coordinates.
 >>> p=pluto.Pluto(10)
 >>> p.snap(10,p.p)
 		"""
-		# import seaborn
-		# seaborn.set_style({"axes.grid": False})
-		# cmap=seaborn.cubehelix_palette(light=1, as_cmap=True)
-
 		d = self.pp
 		lw = 5*self.speed/self.speed.max()
 		I = pp.Image()
@@ -337,6 +331,7 @@ into a uniform grid in the same coordinates.
 			vy=numpy.zeros((n,n))
 			p=rho.copy()
 
+			# *****BOTTLENECK*****
 			# goes through new array
 			for i in range(xnew.size):
 				for j in range(ynew.size):
@@ -353,6 +348,7 @@ into a uniform grid in the same coordinates.
 
 						else: #polar case for bondi
 							print("Geometry not supported. Improve the method.")
+			# *****END BOTTLENECK*****
 
 		#set new variables to null object
 			obj.x1,obj.x2=xnew,ynew
