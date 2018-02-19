@@ -36,7 +36,7 @@ int search(double xref, size_t length, double *x) {
 
 
 
-void regrid(int nxnew, double *xnew, int nynew, double *ynew, int nx, int ny, double *rho, int t3, int t4, double *p, int t5, int t6, double *v1, int t7, int t8, double *v2, int t9, int t10, double *rhonew, int t11, int t12, double *pnew, int t13, int t14, double *vx, int t15, int t16, double *vy) {
+void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r, int n2, double *th, int t1, int t2, double *rho, int t3, int t4, double *p, int t5, int t6, double *v1, int t7, int t8, double *v2, int t9, int t10, double *rhonew, int t11, int t12, double *pnew, int t13, int t14, double *vx, int t15, int t16, double *vy) {
 	/*
 	Performs change of coordinate basis and regridding of arrays from a
 	polar to cartesian basis.
@@ -44,6 +44,8 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int nx, int ny, do
 	Variables t* are temporary ones which are not required in the code, only
 	for the purposes of using numpy.
 	*/
+
+	int iref, jref;
 
 	// goes through new array
 	for (int i=0; i<nxnew; i++) {
@@ -56,12 +58,10 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int nx, int ny, do
 			thnew=atan2(ynew[j], xnew[i]);	// new theta
 
 			// locates position in old coordinate arrays
-
+			iref=search(rnew,n1,r);
+			jref=search(thnew,n2,th)
 
 		}
 	}
 }
 
-
-					iref=nmmn.lsd.search(rnew, r)
-					jref=nmmn.lsd.search(thnew, th)
