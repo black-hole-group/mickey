@@ -1,37 +1,36 @@
-int min(const double *arr, size_t length) {
-    // returns the index corresponding to the minimum value of array
-    // https://codereview.stackexchange.com/a/5146/161148
-    size_t i;
-    double minimum = arr[0];
-    int minindex=0;
+int search(double xref, size_t length, double *x) {
+    /* 
+    Returns the index corresponding to the element in array x with
+    value nearest xref.
+    
+    Inspired on https://codereview.stackexchange.com/a/5146/161148
+    */
+    int i, minindex;
+    double *diff;
+    double minimum;
 
+    // defines array diff=|x-xref|
+    diff = (double *)malloc(sizeof(double)*length);
+    for (i = 0; i < length; i++){
+    	diff[i] = fabs(x[i]-xref);
+    }
+
+    // starting values for search
+    minimum = diff[0];
+    minindex=0;
+
+    // minimum search
     for (i = 1; i < length; ++i) {
-        if (minimum > arr[i]) {
-            minimum = arr[i];
+        if (minimum > diff[i]) {
+            minimum = diff[i];
             minindex=i;
         }
     }
+
     return minindex;
 }
 
 
-
-
-int search(double xref, int nx, double *x) {
-	/* 
-	Finds index in array x corresponding to the element with value nearest
-	xref. 
-	*/
-	
-	double min=x[0];
-
-	// array of differences
-	for (int i = 0; i<nx; ++i) {
-	    if (abs(x[i]-xref) < dist) {
-	        return 0;
-	    }
-	}
-}
 
 
 
