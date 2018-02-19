@@ -45,13 +45,14 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 	for the purposes of using numpy.
 	*/
 
-	int iref, jref;
+	int nnew, iref, jref, nref;
+	double rnew,thnew;
 
 	// goes through new array
 	for (int i=0; i<nxnew; i++) {
 		for (int j=0; j<nynew; j++) {
   			// Need to use 1D index for accessing array elements 
-			int n=i*nynew+j;
+			nnew=i*nynew+j;
 
 			// generates new polar coordinates arrays
 			rnew=sqrt(xnew[i]*xnew[i] + ynew[j]*ynew[j]); // new r
@@ -59,8 +60,17 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 
 			// locates position in old coordinate arrays
 			iref=search(rnew,n1,r);
-			jref=search(thnew,n2,th)
+			jref=search(thnew,n2,th);
+			nref=iref*n2+jref;	// 1d index
 
+			// assigns arrays in new coord. basis
+			rhonew[nnew]=rho[nref];
+			pnew[nnew]=p[nref];
+
+			// cartesian components of velocity vector expressed in polar 
+			// coordinates
+			vx[nnew]=v1[nref]*cos(th[nref])-v2[nref]*sin(th[nref]);
+			vy[nnew]=v1[nref]*sin(th[nref])+v2[nref]*cos(th[nref]);			
 		}
 	}
 }
