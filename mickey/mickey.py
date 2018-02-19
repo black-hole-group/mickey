@@ -407,21 +407,21 @@ into a uniform grid in the same coordinates.
 		vy=numpy.zeros((n,n))
 		p=rho.copy()
 
-		# goes through new array
 		if(gmtry == "SPHERICAL"):
 			performs calculations....
 
-		for i in range(xnew.size):
-			for j in range(ynew.size):
-						rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
-						# position in old array
-						iref=nmmn.lsd.search(rnew, r)
-						jref=nmmn.lsd.search(thnew, th)
+			for i in range(xnew.size):
+				for j in range(ynew.size):
+					rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
+					# position in old array
+					iref=nmmn.lsd.search(rnew, r)
+					jref=nmmn.lsd.search(thnew, th)
 
-						rho[j,i]=self.rho[iref,jref]
-						p[j,i]=self.p[iref,jref]
-						# careful with cartesian conversion for vectors
-						vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
+					rho[j,i]=self.rho[iref,jref]
+					p[j,i]=self.p[iref,jref]
+					# careful with cartesian conversion for vectors
+					vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
+					
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 
