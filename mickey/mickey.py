@@ -292,7 +292,7 @@ Input: 2D simulation generated in any coordinates.
 
 
 	def regrid(self, n=None, xlim = None):
-			"""
+		"""
 Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
 into a uniform grid in the same coordinates.
 
@@ -300,68 +300,142 @@ into a uniform grid in the same coordinates.
 :param xlim: Boundary for the plot and the grid
 
 .. todo:: speed this up with C, the loops slow this down in python.
-			"""
-			import nmmn.lsd, nmmn.misc
+		"""
+		import nmmn.lsd, nmmn.misc
 
-			# creates copy of current object which will have the new
-			# coordinates
-			obj=Pluto() # empty pluto object
+		# creates copy of current object which will have the new
+		# coordinates
+		obj=Pluto() # empty pluto object
 
-			# r, theta
-			r=self.x1
-			th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
-			if(xlim == None):
-					xlim = self.x1.max()
-			gmtry = self.pp.geometry
+		# r, theta
+		r=self.x1
+		th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
+		if(xlim == None):
+				xlim = self.x1.max()
+		gmtry = self.pp.geometry
 
-			# figures out size of cartesian grid
-			if n is None:
-				n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
-				n=int(n)
+		# figures out size of cartesian grid
+		if n is None:
+			n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+			n=int(n)
 
-			if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
-				xnew=numpy.linspace(0, xlim, n)
-				ynew=numpy.linspace(-xlim, xlim, n)
-			else:
-				xnew=numpy.linspace(-xlim, xlim, n)
-				ynew=numpy.linspace(-xlim, xlim, n)
+		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
+			xnew=numpy.linspace(0, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+		else:
+			xnew=numpy.linspace(-xlim, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
 
-			rho=numpy.zeros((n,n))
-			vx=numpy.zeros((n,n))
-			vy=numpy.zeros((n,n))
-			p=rho.copy()
+		rho=numpy.zeros((n,n))
+		vx=numpy.zeros((n,n))
+		vy=numpy.zeros((n,n))
+		p=rho.copy()
 
-			# *****BOTTLENECK*****
-			# goes through new array
-			for i in range(xnew.size):
-				for j in range(ynew.size):
-						if(gmtry == "SPHERICAL"):
-							rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
-							# position in old array
-							iref=nmmn.lsd.search(rnew, r)
-							jref=nmmn.lsd.search(thnew, th)
+		# *****BOTTLENECK*****
+		# goes through new array
+		for i in range(xnew.size):
+			for j in range(ynew.size):
+					if(gmtry == "SPHERICAL"):
+						rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
+						# position in old array
+						iref=nmmn.lsd.search(rnew, r)
+						jref=nmmn.lsd.search(thnew, th)
 
-							rho[j,i]=self.rho[iref,jref]
-							p[j,i]=self.p[iref,jref]
-							# careful with cartesian conversion for vectors
-							vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
+						rho[j,i]=self.rho[iref,jref]
+						p[j,i]=self.p[iref,jref]
+						# careful with cartesian conversion for vectors
+						vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
 
-						else: #polar case for bondi
-							print("Geometry not supported. Improve the method.")
-			# *****END BOTTLENECK*****
+					else: #polar case for bondi
+						print("Geometry not supported. Improve the method.")
+		# *****END BOTTLENECK*****
 
-		#set new variables to null object
-			obj.x1,obj.x2=xnew,ynew
-			obj.rho,obj.p=rho,p
-			obj.v1,obj.v2 = vx,vy
-			obj.regridded=True # flag to tell whether the object was previously regridded
-			obj.t=self.t
-			obj.frame=self.frame
-			obj.speed=numpy.sqrt(vx*vx + vy*vy)
-			obj.X1,obj.X2=numpy.meshgrid(xnew,ynew)
+	#set new variables to null object
+		obj.x1,obj.x2=xnew,ynew
+		obj.rho,obj.p=rho,p
+		obj.v1,obj.v2 = vx,vy
+		obj.regridded=True # flag to tell whether the object was previously regridded
+		obj.t=self.t
+		obj.frame=self.frame
+		obj.speed=numpy.sqrt(vx*vx + vy*vy)
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew)
 
-			return obj
+		return obj
 
+
+
+
+	def regridFast(self, n=None, xlim = None):
+		"""
+Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
+into a uniform grid in the same coordinates.
+
+:param n: New number of elements n^2. If None, figures out by itself
+:param xlim: Boundary for the plot and the grid
+		"""
+		import nmmn.lsd, nmmn.misc
+
+		# C function for fast regridding. Make sure you compile it first
+		# with make
+		import regrid 
+
+		# creates copy of current object which will have the new
+		# coordinates
+		obj=Pluto() # empty pluto object
+
+		# r, theta
+		r=self.x1
+		th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
+		if(xlim == None):
+				xlim = self.x1.max()
+		gmtry = self.pp.geometry
+
+		# figures out size of cartesian grid
+		if n is None:
+			n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+			n=int(n)
+
+		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
+			xnew=numpy.linspace(0, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+		else:
+			xnew=numpy.linspace(-xlim, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+
+		rho=numpy.zeros((n,n))
+		vx=numpy.zeros((n,n))
+		vy=numpy.zeros((n,n))
+		p=rho.copy()
+
+		# goes through new array
+		if(gmtry == "SPHERICAL"):
+			performs calculations....
+
+		for i in range(xnew.size):
+			for j in range(ynew.size):
+						rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
+						# position in old array
+						iref=nmmn.lsd.search(rnew, r)
+						jref=nmmn.lsd.search(thnew, th)
+
+						rho[j,i]=self.rho[iref,jref]
+						p[j,i]=self.p[iref,jref]
+						# careful with cartesian conversion for vectors
+						vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
+		else: #polar case for bondi
+			print("Geometry not supported. Improve the method.")
+
+	#set new variables to null object
+		obj.x1,obj.x2=xnew,ynew
+		obj.rho,obj.p=rho,p
+		obj.v1,obj.v2 = vx,vy
+		obj.regridded=True # flag to tell whether the object was previously regridded
+		obj.t=self.t
+		obj.frame=self.frame
+		obj.speed=numpy.sqrt(vx*vx + vy*vy)
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew)
+
+		return obj
 
 
 
