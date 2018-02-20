@@ -1,3 +1,6 @@
+# Inspiration: https://stackoverflow.com/a/24188094/793218
+#
+
 from setuptools import setup, find_packages, Extension
 import subprocess
 
@@ -18,6 +21,7 @@ setup(
     author_email='rodrigo.nemmen@iag.usp.br',
     url='https://bitbucket.org/nemmen/mickey',
     license=license,
-    ext_modules=[Extension('_fastregrid', ['fastregrid.c'])],
-    packages=find_packages(exclude=('tests', 'docs'))
+    #ext_modules=[Extension('_fastregrid', ['fastregrid.c'])],
+    packages=find_packages(exclude=('tests', 'docs')),
+    package_data={'fastregrid': ['_fastregrid.so']}
 )
