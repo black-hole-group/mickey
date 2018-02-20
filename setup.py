@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages, Extension
+import subprocess
 
 with open('README.md') as f:
     readme = f.read()
@@ -6,10 +7,7 @@ with open('README.md') as f:
 with open('LICENSE') as f:
     license = f.read()
 
-_fastregrid = Extension("_fastregrid",
-                   ["fastregrid.i","fastregrid.c"],
-                   #include_dirs = [numpy_include],
-                   )
+subprocess.call(['make', '-C', 'src'])
 
 setup(
     name='mickey',
