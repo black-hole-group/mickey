@@ -1,8 +1,8 @@
 # put here the root name of your code
 PROGRAM	= regrid
 
-CC	= gcc
-CFLAGS	= -c -fPIC -O2  
+CC	= gcc-7
+CFLAGS	= -c -fPIC -O2 -fopenmp
 
 # determines which python version the user has
 pyv="$(python -c 'import sys; print(sys.version_info[0])')"
