@@ -1,3 +1,8 @@
+/* Inspiration for writing this interface correctly came from these links:
+• http://www.scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html#id9
+• https://docs.scipy.org/doc/numpy-1.13.0/reference/swig.interface-file.html#a-common-example 
+*/
+
 %module regrid
 %{
   #define SWIG_FILE_WITH_INIT
