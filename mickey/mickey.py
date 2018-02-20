@@ -408,7 +408,7 @@ into a uniform grid in the same coordinates.
 		p=rho.copy()
 
 		if(gmtry == "SPHERICAL"):
-			performs calculations....
+			
 
 			for i in range(xnew.size):
 				for j in range(ynew.size):
