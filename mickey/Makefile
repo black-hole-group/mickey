@@ -1,5 +1,5 @@
 # put here the root name of your code
-PROGRAM	= regrid
+PROGRAM	= fastregrid
 
 CC	= gcc-7
 CFLAGS	= -c -fPIC -O2 -fopenmp
@@ -24,5 +24,5 @@ ${PROGRAM}:	${PROGRAM}.c
 	ld -bundle -flat_namespace -undefined suppress -o _${PROGRAM}.so *.o
 
 clean:
-	rm -rf *.o *.mod *.so ${PROGRAM}_wrap.c numpy.i __pycache__
+	rm -rf *.o *.mod *.so ${PROGRAM}_wrap.c numpy.i __pycache__ regrid.py *.pyc
 

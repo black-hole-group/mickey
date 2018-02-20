@@ -3,10 +3,10 @@
 • https://docs.scipy.org/doc/numpy-1.13.0/reference/swig.interface-file.html#a-common-example 
 */
 
-%module regrid
+%module fastregrid
 %{
   #define SWIG_FILE_WITH_INIT
-  #include "regrid.h"
+  #include "fastregrid.h"
 %}
 
 %include "numpy.i"

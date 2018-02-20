@@ -1,4 +1,4 @@
-#include "regrid.h"
+#include "fastregrid.h"
 
 int search(double xref, int length, double *x) {
     /* 

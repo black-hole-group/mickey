@@ -378,7 +378,7 @@ speed things up.
 
 		# C function for fast regridding. Make sure you compile it first
 		# with make
-		import regrid 
+		import fastregrid
 
 		# creates copy of current object which will have the new
 		# coordinates
@@ -409,7 +409,7 @@ speed things up.
 		p=rho.copy()
 
 		if(gmtry == "SPHERICAL"):
-			regrid.regrid(xnew, ynew, r, th, self.rho, self.p, self.v1, self.v2, rho, p, vx, vy)		
+			fastregrid.regrid(xnew, ynew, r, th, self.rho, self.p, self.v1, self.v2, rho, p, vx, vy)		
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 
