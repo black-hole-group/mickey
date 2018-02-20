@@ -24,5 +24,5 @@ ${PROGRAM}:	${PROGRAM}.c
 	ld -bundle -flat_namespace -undefined suppress -o _${PROGRAM}.so *.o
 
 clean:
-	rm -rf *.o *.mod *.so ${PROGRAM}_wrap.c numpy.i __pycache__ regrid.py *.pyc
+	rm -rf *.o *.mod *.so ${PROGRAM}_wrap.c numpy.i __pycache__ ${PROGRAM}.py *.pyc
 
