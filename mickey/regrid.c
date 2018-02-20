@@ -3,7 +3,8 @@
 int search(double xref, int length, double *x) {
     /* 
     Returns the index corresponding to the element in array x with
-    value nearest xref.
+    value nearest xref. Obtains the difference between the array
+    elements and xref, and finds the minimum.
     
     Inspired on https://codereview.stackexchange.com/a/5146/161148
     */
@@ -28,6 +29,8 @@ int search(double xref, int length, double *x) {
             minindex=i;
         }
     }
+
+    free(diff);
 
     return minindex;
 }
