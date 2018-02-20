@@ -415,8 +415,8 @@ speed things up.
 
 	#set new variables to null object
 		obj.x1,obj.x2=xnew,ynew
-		obj.rho,obj.p=rho,p
-		obj.v1,obj.v2 = vx,vy
+		obj.rho,obj.p=rho.T,p.T
+		obj.v1,obj.v2 = vx.T,vy.T
 		obj.regridded=True # flag to tell whether the object was previously regridded
 		obj.t=self.t
 		obj.frame=self.frame
