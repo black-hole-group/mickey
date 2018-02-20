@@ -368,7 +368,8 @@ into a uniform grid in the same coordinates.
 	def regridFast(self, n=None, xlim = None):
 		"""
 Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
-into a uniform grid in the same coordinates.
+into a uniform grid in the same coordinates. Uses a C function to 
+speed things up. 
 
 :param n: New number of elements n^2. If None, figures out by itself
 :param xlim: Boundary for the plot and the grid
@@ -408,20 +409,7 @@ into a uniform grid in the same coordinates.
 		p=rho.copy()
 
 		if(gmtry == "SPHERICAL"):
-			
-
-			for i in range(xnew.size):
-				for j in range(ynew.size):
-					rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
-					# position in old array
-					iref=nmmn.lsd.search(rnew, r)
-					jref=nmmn.lsd.search(thnew, th)
-
-					rho[j,i]=self.rho[iref,jref]
-					p[j,i]=self.p[iref,jref]
-					# careful with cartesian conversion for vectors
-					vx[j,i],vy[j,i]=nmmn.misc.vel_p2c(thnew,self.v1[iref,jref],self.v2[iref,jref])
-					
+			regrid.regrid(xnew, ynew, r, th, self.rho, self.p, self.v1, self.v2, rho, p, vx, vy)		
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 

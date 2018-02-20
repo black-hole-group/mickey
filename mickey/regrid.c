@@ -55,8 +55,8 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 	double rnew,thnew;
 
 	// goes through new array
+	#pragma omp parallel for private(j,nnew,rnew,thnew,iref,jref,nref) collapse(2)
 	for (i=0; i<nxnew; i++) {
-	#pragma omp parallel for private(j,nnew,rnew,thnew,iref,jref,nref) 
 		for (j=0; j<nynew; j++) {
   			// Need to use 1D index for accessing array elements 
 			nnew=i*nynew+j;
