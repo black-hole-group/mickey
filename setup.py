@@ -10,6 +10,7 @@ with open('README.md') as f:
 with open('LICENSE') as f:
     license = f.read()
 
+# compiles the C extensions
 subprocess.call(['make', '-C', 'src'])
 
 setup(
@@ -23,5 +24,5 @@ setup(
     license=license,
     #ext_modules=[Extension('_fastregrid', ['fastregrid.c'])],
     packages=find_packages(exclude=('tests', 'docs')),
-    package_data={'fastregrid': ['_fastregrid.so']}
+    #package_data={'mickey': ['_fastregrid.so']}
 )
