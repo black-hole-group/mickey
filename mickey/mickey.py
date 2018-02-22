@@ -92,10 +92,13 @@ class Pluto:
 			# convenient meshgrid arrays
 			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
 			self.DX1,self.DX2=numpy.meshgrid(self.dx1,self.dx2)
-			#self.R,self.TH=numpy.meshgrid(self.r,self.th)
+			self.R,self.TH=numpy.meshgrid(self.r,self.th)
 
 			# accretion rate as a function of radius, self.mdot
 			self.getmdot()	
+
+			# total mass in computational volume, self.mass
+			self.getmass()
 
 
 	def getgamma(self):
@@ -187,6 +190,58 @@ class Pluto:
 		# integrates in theta
 		self.mdot=numpy.sum(dmdot, axis=0)
 
+
+
+
+	def getmass(self):
+		"""
+	Computes total mass in computational volume.
+
+	:returns: new attribute mass, float
+		"""
+		# volume differential
+		dm=2.*numpy.pi*self.X1**2*self.rho.T*numpy.sin(self.X2)*self.DX1*self.DX2
+
+		# integration
+		self.mass=dm.sum()
+
+
+
+
+
+	def optimalgrid(self):
+		"""
+	Determines the best resolution when changing coordinate basis from polar
+	to cartesian (regrid), to avoid losing information.
+
+	Detailed explanation of procedure available on 
+	https://github.com/black-hole-group/group-wiki/blob/master/pluto-analysis-tutorial-02-colormaps-and-regridding.ipynb
+
+	:param :
+	:returns:
+		"""
+		# total area of cartesian grid
+		area_car=self.x1[-1]**2 
+
+		# Select the inner parts--with highest resolution--of the polar grid
+		# for computing the density of grid elements: 2 cells in r, all cells in
+		# theta.
+		# 
+		# In the future, when we will decrease the angular resolution towards the
+		# poles, we will have to choose a subset of theta-elements instead of the 
+		# full range, say [n2/4:3/4*n2,0:2]
+		X1=self.X1[:,0:2] # r-values
+		X2=self.X2[:,0:2] # theta-values
+		DX1=self.DX1[:,0:2] # dr-values
+		DX2=self.DX2[:,0:2] # dtheta-values
+
+		# variables for inner parts of polar grid
+		n_polar=X1.size # number of elements counted
+		darea=X1*DX1*DX2 # area elements
+		area_polar=darea.sum() # total area for inner grid
+
+		# required number of elements along each direction in cartesian grid
+		return int(numpy.sqrt(area_car*n_polar/area_polar))
 
 
 	
@@ -304,10 +359,11 @@ into a uniform grid in the same coordinates.
 				xlim = self.x1.max()
 		gmtry = self.pp.geometry
 
-		# figures out size of cartesian grid
+		# figures out optimal size of cartesian grid
 		if n is None:
-			n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
-			n=int(n)
+			#n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+			#n=int(n)
+			n=self.optimalgrid()
 
 		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
 			xnew=numpy.linspace(0, xlim, n)
@@ -419,6 +475,7 @@ speed things up.
 		obj.frame=self.frame
 		obj.speed=numpy.sqrt(vx*vx + vy*vy).T # Cartesian
 		obj.mdot=self.mdot
+		obj.mass=self.mass
 
 		return obj
 
