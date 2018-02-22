@@ -13,36 +13,6 @@ import scipy.interpolate
 
 
 
-def movie(fname="movie.avi"):
-	 """
-3D movie generation.
-	 """
-	 import fish
-	 import os, fnmatch
-	 import subprocess
-
-	 # count the number of snapshots to create the movie
-	 nfiles=0
-	 for file in os.listdir('.'):
-			if fnmatch.fnmatch(file, 'plot*.jpeg'):
-				 nfiles=nfiles+1
-
-	 # creates ascii list of files
-	 #cmd="ls plot.*.jpeg | sort -n -t . -k 2 > list.txt"
-	 #subprocess.call(cmd.split())
-
-	 # Progress bar initialization
-	 peixe = fish.ProgressFish(total=nfiles)
-
-	 # snapshot creation
-	 for i in range(0,nfiles-1):
-			#cutplane(i)
-			volume(i)
-			#snap(i)
-			peixe.animate(amount=i)
-
-
-
 
 
 
@@ -116,8 +86,8 @@ class Pluto:
 			self.mach=self.speed/self.cs
 
 			# polar coordinates (instead of spherical coords)
-			#self.r=self.x1
-			#self.th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
+			self.r=self.x1
+			self.th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
 
 			# convenient meshgrid arrays
 			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
@@ -142,6 +112,22 @@ class Pluto:
 						s=line.split() # splits string divided by whitespaces
 						self.gamma=float(s[1])
 									
+
+
+
+	def mdotr(self,r):
+		"""
+	Given a certain value of radius, returns the mdot at the nearest
+	simulated radius.
+		"""
+		import nmmn.lsd
+
+		# searches self.r instead of self.x1 to avoid conflicts, e.g.
+		# going through a cartesian array rather than a polar one
+		i=nmmn.lsd.search(r,self.r)
+
+		return self.mdot[i]
+
 
 
 
