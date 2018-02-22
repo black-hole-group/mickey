@@ -91,10 +91,10 @@ class Pluto:
 
 			# pressure
 			self.p=d.prs
-			self.p_grad = numpy.gradient(d.prs)
+			#self.p_grad = numpy.gradient(d.prs)
 			# volume density
 			self.rho=d.rho 
-			self.rho_grad = numpy.gradient(d.rho)
+			#self.rho_grad = numpy.gradient(d.rho)
 			# time
 			self.t=d.SimTime
 
@@ -115,12 +115,17 @@ class Pluto:
 			if d.n3>1: self.mach3=self.v3/self.cs
 			self.mach=self.speed/self.cs
 
+			# polar coordinates (instead of spherical coords)
+			#self.r=self.x1
+			#self.th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
+
 			# convenient meshgrid arrays
 			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
 			self.DX1,self.DX2=numpy.meshgrid(self.dx1,self.dx2)
+			#self.R,self.TH=numpy.meshgrid(self.r,self.th)
 
-			# accretion rates
-			#self.getmdot()	# => self.mdot
+			# accretion rate as a function of radius, self.mdot
+			self.getmdot()	
 
 
 	def getgamma(self):
@@ -185,17 +190,16 @@ class Pluto:
 
 
 	def getmdot(self):
-		# compute mass accretion rate valid for any accretion flow
-		# right now, this is only valid for polar 2d sims
+		"""
+	Computes mass accretion rate as a function of radius.
 
-		# arrays convenient for vectorization
-		r,th = numpy.meshgrid(self.x1,self.x2)
-		dr,dth = numpy.meshgrid(self.dx1,self.dx2)
+	:returns: new attribute mdot, array with the same shape as X1 (radius)
+		"""
+		# mdot differential
+		dmdot=2.*numpy.pi*self.X1**2*self.rho.T*self.v1.T*numpy.sin(self.X2)*self.DX2
 
-		#x=2.*pi*d['rho'][2,:]*d['x1'][2]**2*sin(d['x2'])*d['v1'][2,:]*d['dx2']
-		dmdot=2.*numpy.pi*self.rho*r.T**2*numpy.sin(th)*self.v1*dth.T
-
-		self.mdot=dmdot.sum(1) # sums along phi axis
+		# integrates in theta
+		self.mdot=numpy.sum(dmdot, axis=0)
 
 
 
@@ -413,17 +417,22 @@ speed things up.
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 
-		#set new variables to null object
-		obj.x1,obj.x2=xnew,ynew # coord arrays, 1D
-		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # coord arrays, 2D
+		# physical fields
 		obj.rho,obj.p=rho.T,p.T
 		obj.v1,obj.v2 = vx.T,vy.T # Cartesian basis
+
+		# coordinate arrays
+		obj.x1,obj.x2=xnew,ynew # coord arrays, 1D
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # coord arrays, 2D
 		obj.r, obj.th = nmmn.misc.cart2pol(obj.X1, obj.X2) # polar coords
 		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.th,obj.v1,obj.v2) # polar basis
+
+		# misc info
 		obj.regridded=True # flag to tell whether the object was previously regridded
 		obj.t=self.t
 		obj.frame=self.frame
 		obj.speed=numpy.sqrt(vx*vx + vy*vy).T # Cartesian
+		obj.mdot=self.mdot
 
 		return obj
 
