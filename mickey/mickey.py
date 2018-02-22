@@ -413,15 +413,17 @@ speed things up.
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 
-	#set new variables to null object
-		obj.x1,obj.x2=xnew,ynew
+		#set new variables to null object
+		obj.x1,obj.x2=xnew,ynew # coord arrays, 1D
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # coord arrays, 2D
 		obj.rho,obj.p=rho.T,p.T
-		obj.v1,obj.v2 = vx.T,vy.T
+		obj.v1,obj.v2 = vx.T,vy.T # Cartesian basis
+		obj.r, obj.th = nmmn.misc.cart2pol(obj.X1, obj.X2) # polar coords
+		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.th,obj.v1,obj.v2) # polar basis
 		obj.regridded=True # flag to tell whether the object was previously regridded
 		obj.t=self.t
 		obj.frame=self.frame
-		obj.speed=numpy.sqrt(vx*vx + vy*vy)
-		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew)
+		obj.speed=numpy.sqrt(vx*vx + vy*vy).T # Cartesian
 
 		return obj
 

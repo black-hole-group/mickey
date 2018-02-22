@@ -84,5 +84,32 @@ Plot the computational mesh grid.
 
 
 
+def streamplot(obj, x0, x1, y0, y1, *arg, **args):
+    """
+Fast version of matplotlib's streamplot method. Instead of computing streamlines
+for the whole domain of the arrays, this method crops the array to the given
+[x0,x1,y0,y1] range. This yields a great speedup.
 
+For a demonstration of the technique, please check out the jupyter notebook
+below:
+https://github.com/black-hole-group/group-wiki/blob/master/pluto-analysis-tutorial-02-colormaps-and-regridding.ipynb
+
+:param obj: pluto object created with Mickey, storing the arrays for the simulation you want to visualize
+:param x0, x1: specify the plotting range for x
+:param y0, y1: specify the plotting range for y
+
+Any extra arguments provided will be passed to matplotlib's streamplot.
+
+Example
+
+>>> p=mickey.mickey.Pluto(10)
+>>> mickey.plot.streamplot(p, 0, 2, -1, 1, density=1.5)
+    """
+    import nmmn.lsd
+
+    # crops arrays
+    v1crop, X1crop, X2crop = nmmn.lsd.crop(p.v1, p.X1, p.X2, x0,x1,y0,y1,all=True)
+    v2crop = nmmn.lsd.crop(p.v2, p.X1, p.X2, 0,2,-1,1)
+
+    pylab.streamplot(X1crop, X2crop, v1crop, v2crop, *arg, **args)
 

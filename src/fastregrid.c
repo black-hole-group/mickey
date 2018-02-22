@@ -74,8 +74,7 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 			rhonew[nnew]=rho[nref];
 			pnew[nnew]=p[nref];
 
-			// cartesian components of velocity vector expressed in polar 
-			// coordinates
+			// cartesian components of velocity vector 
 			vx[nnew]=v1[nref]*cos(th[nref])-v2[nref]*sin(th[nref]);
 			vy[nnew]=v1[nref]*sin(th[nref])+v2[nref]*cos(th[nref]);			
 		}
