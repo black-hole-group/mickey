@@ -41,7 +41,7 @@ int search(double xref, int length, double *x) {
 
 
 
-void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r, int n2, double *th, double *rho, double *p, double *v1, double *v2, double *rhonew, double *pnew, double *vx, double *vy) {
+void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r, int n2, double *th, double *rho, double *p, double *v1, double *v2, double *v3, double *rhonew, double *pnew, double *vx, double *vy, double *vz) {
 	/*
 	Performs change of coordinate basis and regridding of arrays from a
 	polar to cartesian basis.
@@ -77,6 +77,7 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 			// cartesian components of velocity vector 
 			vx[nnew]=v1[nref]*cos(th[nref])-v2[nref]*sin(th[nref]);
 			vy[nnew]=v1[nref]*sin(th[nref])+v2[nref]*cos(th[nref]);			
+			vz[nnew]=v3[nref]; // vphi
 		}
 	}
 }

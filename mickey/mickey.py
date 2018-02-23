@@ -49,6 +49,7 @@ class Pluto:
 			d=pp.pload(i,*arg,**args)
 			
 			# mesh,  and velocities
+			'''
 			if d.n1>1: 
 				self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.dx1
 				self.speed=numpy.sqrt(self.v1*self.v1)
@@ -56,8 +57,11 @@ class Pluto:
 				self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.dx2
 				self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2)
 			if d.n3>1: 
-				self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
-				self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
+			'''
+			self.x1,self.v1,self.n1,self.dx1=d.x1,d.vx1,d.n1,d.dx1
+			self.x2,self.v2,self.n2,self.dx2=d.x2,d.vx2,d.n2,d.dx2
+			self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
+			self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
 			# polar coordinates (code units in spherical coords)
 			self.r=self.x1
@@ -73,9 +77,9 @@ class Pluto:
 			self.rho=d.rho # volume density
 			self.getgamma() # gets value of adiabatic index
 			self.entropy=numpy.log(self.p/self.rho**self.gamma)
-			self.am=self.v2.T*self.X1*numpy.sin(self.X2) # specific a. m., vphi*r*sin(theta)
+			self.am=self.v3.T*self.X1*numpy.sin(self.X2) # specific a. m., vphi*r*sin(theta)
 			self.Be=self.speed.T**2/2.+self.gamma*self.p.T/((self.gamma-1.)*self.rho.T)-1./self.X1	# Bernoulli function
-			self.Omega=self.v2.T/self.X1	# angular velocity
+			self.Omega=self.v3.T/self.X1	# angular velocity
  
 			# misc. info
 			self.t=d.SimTime
@@ -418,6 +422,10 @@ Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
 into a uniform grid in the same coordinates. Uses a C function to 
 speed things up. 
 
+One has to be particularly careful below about using a polar angle
+(-pi/2<theta<pi/2) vs a spherical polar angle (0<theta_sph<pi). The
+choice can affect some specific transformations.
+
 :param n: New number of elements n^2. If None, figures out by itself
 :param xlim: Boundary for the plot and the grid
 		"""
@@ -454,36 +462,39 @@ speed things up.
 		rho=numpy.zeros((n,n))
 		vx=numpy.zeros((n,n))
 		vy=numpy.zeros((n,n))
+		vz=numpy.zeros((n,n)) # vphi
 		p=rho.copy()
 
 		if(gmtry == "SPHERICAL"):
-			fastregrid.regrid(xnew, ynew, r, th, self.rho, self.p, self.v1, self.v2, rho, p, vx, vy)		
+			fastregrid.regrid(xnew, ynew, r, th, self.rho, self.p, self.v1, self.v2, self.v3, rho, p, vx, vy, vz)		
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 
 		# coordinate arrays
-		obj.x1,obj.x2=xnew,ynew # coord arrays, 1D
-		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # coord arrays, 2D
+		obj.x1,obj.x2=xnew,ynew # cartesian coords, 1D
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # cartesian coords, 2D
 		obj.r, obj.th = nmmn.misc.cart2pol(xnew, ynew) # polar coords, 1D
 		obj.R, obj.TH = numpy.meshgrid(obj.r,obj.th) # polar coords, 2D
+		obj.rsp, obj.thsp = obj.r, numpy.pi/2.-obj.th # spherical polar angle, 1D
+		obj.RSP, obj.THSP = numpy.meshgrid(obj.rsp,obj.thsp) # spherical polar coords, 2D
 
 		# velocities
-		obj.v1,obj.v2 = vx.T,vy.T # Cartesian components
+		obj.v1,obj.v2,obj.v3 = vx.T,vy.T,vz.T # Cartesian components
 		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.TH,obj.v1,obj.v2) # polar components
-		obj.speed = numpy.sqrt(obj.v1**2+obj.v2**2)
+		obj.speed = numpy.sqrt(obj.v1**2+obj.v2**2+obj.v3**3)
 
 		# fluid variables
+		obj.gamma=self.gamma
 		obj.rho,obj.p=rho.T,p.T
-		obj.entropy=numpy.log(obj.p/obj.rho**self.gamma)
-		obj.am=self.v2.T*self.X1*numpy.sin(self.X2) # specific a. m., vphi*r*sin(theta)
-		obj.Be=self.speed.T**2/2.+self.gamma*self.p.T/((self.gamma-1.)*self.rho.T)-1./self.X1	# Bernoulli function
-		obj.Omega=self.v2.T/self.X1	# angular velocity
+		obj.entropy=numpy.log(obj.p/obj.rho**obj.gamma)
+		obj.am=obj.v3*obj.R*numpy.sin(obj.THSP) # specific a. m., vphi*r*sin(theta)
+		obj.Be=obj.speed**2/2.+obj.gamma*obj.p/((obj.gamma-1.)*obj.rho)-1./obj.X1	# Bernoulli function
+		obj.Omega=obj.v3/obj.R	# angular velocity
 
 		# misc info
 		obj.regridded=True # flag to tell whether the object was previously regridded
 		obj.t=self.t
 		obj.frame=self.frame
-		obj.speed=numpy.sqrt(vx*vx + vy*vy).T # Cartesian
 		obj.mdot=self.mdot
 		obj.mass=self.mass
 
