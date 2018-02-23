@@ -34,6 +34,6 @@ there is nothing there that we wish to expose to Python */
     /*  takes as input 14 (!!) numpy arrays */
     void regrid_func(int n1, double *in_arr1, int n2, double *in_arr2, int n3, double *in_arr3, int n4, double *in_arr4, int l5, int c5, double *in_arr5, int l6, int c6, double *in_arr6, int l7, int c7, double *in_arr7, int l8, int c8, double *in_arr8, int l9, int c9, double *in_arr9, int lo1, int co1, double *out_arr1, int lo2, int co2, double *out_arr2, int lo3, int co3, double *out_arr3, int lo4, int co4, double *out_arr4, int lo5, int co5, double *out_arr5) {
         /*  calls the original funcion, providing only the size of the first */
-        regrid(n1, in_arr1, n2, in_arr2, n3, in_arr3, n4, in_arr4, in_arr5, in_arr6,  in_arr7,  in_arr8, in_arr8,  out_arr1,  out_arr2,  out_arr3,  out_arr4, out_arr5);
+        regrid(n1, in_arr1, n2, in_arr2, n3, in_arr3, n4, in_arr4, in_arr5, in_arr6,  in_arr7,  in_arr8, in_arr9,  out_arr1,  out_arr2,  out_arr3,  out_arr4, out_arr5);
     }
 %}
