@@ -42,7 +42,7 @@ class Pluto:
 	:param stdout: if False, suppresses message mentioning the file that was processed
 	"""
 		
-	def __init__(self, i=None,gamma=1.66666,*arg,**args):
+	def __init__(self, i=None,*arg,**args):
 		# if i is not given, then initialize an empty object
 		# otherwise read from the given frame number
 		if i is not None:
@@ -59,23 +59,32 @@ class Pluto:
 				self.x3,self.v3,self.n3,self.dx3=d.x3,d.vx3,d.n3,d.dx3
 				self.speed=numpy.sqrt(self.v1*self.v1 + self.v2*self.v2 + self.v3*self.v3)
 
-			# pressure
-			self.p=d.prs
-			#self.p_grad = numpy.gradient(d.prs)
-			# volume density
-			self.rho=d.rho 
-			#self.rho_grad = numpy.gradient(d.rho)
-			# time
-			self.t=d.SimTime
+			# polar coordinates (code units in spherical coords)
+			self.r=self.x1
+			self.th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
 
+			# convenient meshgrid arrays
+			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
+			self.DX1,self.DX2=numpy.meshgrid(self.dx1,self.dx2)
+			self.R,self.TH=numpy.meshgrid(self.r,self.th)
+
+			# fluid variables
+			self.p=d.prs # pressure
+			self.rho=d.rho # volume density
+			self.getgamma() # gets value of adiabatic index
+			self.entropy=numpy.log(self.p/self.rho**self.gamma)
+			self.am=self.v2.T*self.X1*numpy.sin(self.X2) # specific a. m., vphi*r*sin(theta)
+			self.Be=self.speed.T**2/2.+self.gamma*self.p.T/((self.gamma-1.)*self.rho.T)-1./self.X1	# Bernoulli function
+			self.Omega=self.v2.T/self.X1	# angular velocity
+ 
 			# misc. info
+			self.t=d.SimTime
 			self.pp =d # pypluto object
 			self.frame=i
 			self.vars=d.vars
 			self.geometry=d.geometry
 
 			# sound speed
-			self.getgamma() # gets value of adiabatic index
 			#self.soundspeed() # computes numerical cs (no need to specify EoS)
 			self.cs=numpy.sqrt(self.gamma*self.p/self.rho)
 
@@ -84,15 +93,6 @@ class Pluto:
 			if d.n2>1: self.mach2=self.v2/self.cs
 			if d.n3>1: self.mach3=self.v3/self.cs
 			self.mach=self.speed/self.cs
-
-			# polar coordinates (instead of spherical coords)
-			self.r=self.x1
-			self.th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
-
-			# convenient meshgrid arrays
-			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
-			self.DX1,self.DX2=numpy.meshgrid(self.dx1,self.dx2)
-			self.R,self.TH=numpy.meshgrid(self.r,self.th)
 
 			# accretion rate as a function of radius, self.mdot
 			self.getmdot()	
@@ -364,6 +364,7 @@ into a uniform grid in the same coordinates.
 			#n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
 			#n=int(n)
 			n=self.optimalgrid()
+			print(n)
 
 		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
 			xnew=numpy.linspace(0, xlim, n)
@@ -437,10 +438,11 @@ speed things up.
 				xlim = self.x1.max()
 		gmtry = self.pp.geometry
 
-		# figures out size of cartesian grid
+		# figures out optimal size of cartesian grid
 		if n is None:
-			n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
-			n=int(n)
+			#n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+			#n=int(n)
+			n=self.optimalgrid()
 
 		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
 			xnew=numpy.linspace(0, xlim, n)
@@ -459,15 +461,23 @@ speed things up.
 		else: #polar case for bondi
 			print("Geometry not supported. Improve the method.")
 
-		# physical fields
-		obj.rho,obj.p=rho.T,p.T
-		obj.v1,obj.v2 = vx.T,vy.T # Cartesian basis
-
 		# coordinate arrays
 		obj.x1,obj.x2=xnew,ynew # coord arrays, 1D
 		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # coord arrays, 2D
-		obj.r, obj.th = nmmn.misc.cart2pol(obj.X1, obj.X2) # polar coords
-		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.th,obj.v1,obj.v2) # polar basis
+		obj.r, obj.th = nmmn.misc.cart2pol(xnew, ynew) # polar coords, 1D
+		obj.R, obj.TH = numpy.meshgrid(obj.r,obj.th) # polar coords, 2D
+
+		# velocities
+		obj.v1,obj.v2 = vx.T,vy.T # Cartesian components
+		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.TH,obj.v1,obj.v2) # polar components
+		obj.speed = numpy.sqrt(obj.v1**2+obj.v2**2)
+
+		# fluid variables
+		obj.rho,obj.p=rho.T,p.T
+		obj.entropy=numpy.log(obj.p/obj.rho**self.gamma)
+		obj.am=self.v2.T*self.X1*numpy.sin(self.X2) # specific a. m., vphi*r*sin(theta)
+		obj.Be=self.speed.T**2/2.+self.gamma*self.p.T/((self.gamma-1.)*self.rho.T)-1./self.X1	# Bernoulli function
+		obj.Omega=self.v2.T/self.X1	# angular velocity
 
 		# misc info
 		obj.regridded=True # flag to tell whether the object was previously regridded
