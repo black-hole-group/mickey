@@ -488,7 +488,7 @@ choice can affect some specific transformations.
 		obj.rho,obj.p=rho.T,p.T
 		obj.entropy=numpy.log(obj.p/obj.rho**obj.gamma)
 		obj.am=obj.v3*obj.R*numpy.sin(obj.THSP) # specific a. m., vphi*r*sin(theta)
-		obj.Be=obj.speed**2/2.+obj.gamma*obj.p/((obj.gamma-1.)*obj.rho)-1./obj.X1	# Bernoulli function
+		obj.Be=obj.speed**2/2.+obj.gamma*obj.p/((obj.gamma-1.)*obj.rho)-1./obj.R	# Bernoulli function
 		obj.Omega=obj.v3/obj.R	# angular velocity
 
 		# misc info
