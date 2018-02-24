@@ -138,8 +138,10 @@ class Pluto:
 			if d.n3>1: self.mach3=self.v3/self.cs
 			self.mach=self.speed/self.cs
 
-			# accretion rate as a function of radius, self.mdot
-			self.getmdot()	
+			# accretion rates as a function of radius
+			self.getmdot() # net accretion rate, self.mdot
+			self.getmdotin() # inflow, self.mdotin
+			self.getmdotout() # outflow, self.mdotout
 
 			# total mass in computational volume, self.mass
 			self.getmass()
@@ -224,7 +226,9 @@ class Pluto:
 
 	def getmdot(self):
 		"""
-	Computes mass accretion rate as a function of radius.
+	Computes the net mass accretion rate as a function of radius,
+
+	mdotacc(r) = mdotin(r) + mdotout(r)
 
 	:returns: new attribute mdot, array with the same shape as X1 (radius)
 		"""
@@ -233,6 +237,48 @@ class Pluto:
 
 		# integrates in theta
 		self.mdot=numpy.sum(dmdot, axis=0)
+
+
+
+
+	def getmdotin(self):
+		"""
+	Computes mass inflow rate as a function of radius. Follows the definition
+	of Stone et al. (1999), eq. 10.
+
+	:returns: new attribute mdot, array with the same shape as X1 (radius)
+		"""
+		# keeps only negative (inflow) radial velocities
+		v1=self.v1.copy()
+		v1[v1>=0]=0
+
+		# mdot differential
+		dmdot=2.*numpy.pi*self.X1**2*self.rho.T*v1.T*numpy.sin(self.X2)*self.DX2
+
+		# integrates in theta
+		self.mdotin=numpy.sum(dmdot, axis=0)
+
+
+
+
+	def getmdotout(self):
+		"""
+	Computes mass outflow rate as a function of radius. Follows the definition
+	of Stone et al. (1999), eq. 11.
+
+	:returns: new attribute mdot, array with the same shape as X1 (radius)
+		"""
+		# keeps only positive (outflow) radial velocities
+		v1=self.v1.copy()
+		v1[v1<=0]=0
+
+		# mdot differential
+		dmdot=2.*numpy.pi*self.X1**2*self.rho.T*v1.T*numpy.sin(self.X2)*self.DX2
+
+		# integrates in theta
+		self.mdotout=numpy.sum(dmdot, axis=0)
+
+
 
 
 
