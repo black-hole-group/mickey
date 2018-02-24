@@ -17,6 +17,46 @@ import scipy.interpolate
 
 
 
+def angleAvg(thArr,arr,theta0,theta1):
+	"""
+	Given an input 2D array in a spherical polar coordinate basis, 
+	and the corresponding coordinates (2D arrays),
+	this method computes the angle-average within the angle bounds
+	provided. 
+
+	:param thArr: spherical polar angle, 1D, with the corresponding angles where arr is tabulated	
+	:param arr: array where the angle-averaging will be carried out (e.g. density)
+	:param theta0: initial angle in degrees
+	:param theta1: final angle in degrees
+	:returns: 1D array with average values as a function of radius
+
+	Example:
+
+	>>> avg=angleAvg(x2,rho,84,96)
+	"""
+	import nmmn.lsd
+
+	# lower and upper bound for angle average
+	th0=theta0*numpy.pi/180.
+	th1=theta1*numpy.pi/180.
+
+	# indexes corresponding to the above bounds
+	i0=nmmn.lsd.search(th0,thArr)
+	i1=nmmn.lsd.search(th1,thArr)
+
+	# Makes sure that the bounds are obeyed
+	if thArr[i0]<th0: i0=i0+1
+	if thArr[i1]>th1: i1=i1-1
+
+	# angle-average
+	arrAvg=numpy.mean(arr.T[i0:i1,:],axis=0)
+
+	# computes the standard deviation of the values
+	rhoSd=numpy.std(arr.T[i0:i1,:],axis=0)
+
+	return arrAvg, rhoSd
+
+
 
 
 class Pluto:
