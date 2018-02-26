@@ -652,22 +652,22 @@ regridFast".
 		# ## Host variables
 		# Define host arrays with appropriate precision, suffix `_h`. 
 		# First the input arrays
-		xnew_h = xnew.astype(np.float32)
-		ynew_h = ynew.astype(np.float32)
-		r_h = r.astype(np.float32)
-		th_h = th.astype(np.float32)
-		rhoin_h = self.rho.astype(np.float32)
-		pin_h = self.p.astype(np.float32)
-		v1in_h = self.v1.astype(np.float32)
-		v2in_h = self.v2.astype(np.float32)
-		v3in_h = self.v3.astype(np.float32)
+		xnew_h = xnew.astype(numpy.float32)
+		ynew_h = ynew.astype(numpy.float32)
+		r_h = r.astype(numpy.float32)
+		th_h = th.astype(numpy.float32)
+		rhoin_h = self.rho.astype(numpy.float32)
+		pin_h = self.p.astype(numpy.float32)
+		v1in_h = self.v1.astype(numpy.float32)
+		v2in_h = self.v2.astype(numpy.float32)
+		v3in_h = self.v3.astype(numpy.float32)
 
 		# then the output arrays
-		rho_h = rho.astype(np.float32)
-		p_h = p.astype(np.float32)
-		vx_h = vx.astype(np.float32)
-		vy_h = vy.astype(np.float32)
-		vz_h = vz.astype(np.float32)
+		rho_h = rho.astype(numpy.float32)
+		p_h = p.astype(numpy.float32)
+		vx_h = vx.astype(numpy.float32)
+		vy_h = vy.astype(numpy.float32)
+		vz_h = vz.astype(numpy.float32)
 
 		# ## Device variables
 		# Buffers, suffix `_d`. Input arrays

@@ -1,3 +1,4 @@
+
 int search(float xref, int length, global float *x) {
     /* 
     Returns the index corresponding to the element in array x with
