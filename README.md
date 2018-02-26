@@ -92,12 +92,19 @@ The *c* object's attributes are now:
 
 ## Lots of more examples
 
+# Branch explanation
+
+- `master`: stable branch, with recommended optimizations (one hopes)
+- `swig`: C-extensions for faster regridding, incorporated through `SWIG`. Serial code
+- `openmp`: C-extensions for optimization, SWIG interface, OpenMP acceleration. Very similar to branch `swig`
+- `opencl`: by far the fastest optimization, incorporated using C and `PyOpenCL`
 
 # TODO
 
-- [ ] compute total mass in volume
-- [ ] compute Mdot for a given radius
-- [ ] compute energy, a.m. 
+- [x] compute total mass in volume
+- [x] compute Mdot for a given radius
+- [ ] compute energy, 
+- [x] a.m. 
 - [ ] compute how much mass was lost from the volume due to outflows
 - [x] script to mirror local files to `alphacrucis`, for easy compilation
 
