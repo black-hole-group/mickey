@@ -1,3 +1,9 @@
+"""
+Script for testing the OpenCL kernel fastregrid.cl.
+
+Detailed testing in jupyter notebook "pluto debug regridFast".
+"""
+
 import pylab
 import mickey.mickey
 import mickey.plot

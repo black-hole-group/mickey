@@ -590,6 +590,103 @@ choice can affect some specific transformations.
 
 
 
+
+	def regridGPU(self, n=None, xlim = None):
+		"""
+Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
+into a uniform grid in the same coordinates. Uses a GPU acceleration
+through OpenCL to speed things up. 
+
+One has to be particularly careful below about using a polar angle
+(-pi/2<theta<pi/2) vs a spherical polar angle (0<theta_sph<pi). The
+choice can affect some specific transformations.
+
+:param n: New number of elements n^2. If None, figures out by itself
+:param xlim: Boundary for the plot and the grid
+		"""
+		import nmmn.lsd, nmmn.misc
+
+		# C function for fast regridding. Make sure you compile it first
+		# with make
+		import fastregrid
+
+		# creates copy of current object which will have the new
+		# coordinates
+		obj=Pluto() # empty pluto object
+
+		# r, theta
+		r=self.x1
+		th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
+		if(xlim == None):
+				xlim = self.x1.max()
+		gmtry = self.pp.geometry
+
+		# figures out optimal size of cartesian grid
+		if n is None:
+			#n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
+			#n=int(n)
+			n=self.optimalgrid()
+
+		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
+			xnew=numpy.linspace(0, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+		else:
+			xnew=numpy.linspace(-xlim, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+
+		rho=numpy.zeros((n,n))
+		vx=numpy.zeros((n,n))
+		vy=numpy.zeros((n,n))
+		vz=numpy.zeros((n,n)) # vphi
+		p=rho.copy()
+
+		if(gmtry == "SPHERICAL"):
+			fastregrid.regrid(xnew, ynew, r, th, self.rho, self.p, self.v1, self.v2, self.v3, rho, p, vx, vy, vz)		
+		else: #polar case for bondi
+			print("Geometry not supported. Improve the method.")
+
+		# coordinate arrays
+		obj.x1,obj.x2=xnew,ynew # cartesian coords, 1D
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # cartesian coords, 2D
+		obj.r, obj.th = nmmn.misc.cart2pol(xnew, ynew) # polar coords, 1D
+		obj.R, obj.TH = numpy.meshgrid(obj.r,obj.th) # polar coords, 2D
+		obj.rsp, obj.thsp = obj.r, numpy.pi/2.-obj.th # spherical polar angle, 1D
+		obj.RSP, obj.THSP = numpy.meshgrid(obj.rsp,obj.thsp) # spherical polar coords, 2D
+
+		# velocities
+		obj.v1,obj.v2,obj.v3 = vx.T,vy.T,vz.T # Cartesian components
+		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.TH,obj.v1,obj.v2) # polar components
+		obj.speed = numpy.sqrt(obj.v1**2+obj.v2**2+obj.v3**3)
+
+		# fluid variables
+		obj.gamma=self.gamma
+		obj.rho,obj.p=rho.T,p.T
+		obj.entropy=numpy.log(obj.p/obj.rho**obj.gamma)
+		obj.am=obj.v3*obj.R*numpy.sin(obj.THSP) # specific a. m., vphi*r*sin(theta)
+		obj.Be=obj.speed**2/2.+obj.gamma*obj.p/((obj.gamma-1.)*obj.rho)-1./obj.R	# Bernoulli function
+		obj.Omega=obj.v3/obj.R	# angular velocity
+
+		# misc info
+		obj.regridded=True # flag to tell whether the object was previously regridded
+		obj.t=self.t
+		obj.frame=self.frame
+		obj.mdot=self.mdot
+		obj.mass=self.mass
+
+		return obj
+
+
+
+
+
+
+
+
+
+
+
+
+
 	def yt2d(self):
 		"""
 	Converts 2d arrays to the 3d format that is understood
