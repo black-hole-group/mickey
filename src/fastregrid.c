@@ -12,14 +12,6 @@ int search(double xref, int length, double *x) {
     double diff;
     double minimum;
 
-    // defines array diff=|x-xref|
-    /*
-    diff = (double *)malloc(sizeof(double)*length);
-    for (i = 0; i < length; i++){
-    	diff[i] = fabs(x[i]-xref);
-    }
-    */
-
     // starting values for search
     minimum = fabs(x[0]-xref); //diff[0];
     minindex=0;
@@ -32,8 +24,6 @@ int search(double xref, int length, double *x) {
             minindex=i;
         }
     }
-
-    //free(diff);
 
     return minindex;
 }
