@@ -9,28 +9,31 @@ int search(double xref, int length, double *x) {
     Inspired on https://codereview.stackexchange.com/a/5146/161148
     */
     int i, minindex;
-    double *diff;
+    double diff;
     double minimum;
 
     // defines array diff=|x-xref|
+    /*
     diff = (double *)malloc(sizeof(double)*length);
     for (i = 0; i < length; i++){
     	diff[i] = fabs(x[i]-xref);
     }
+    */
 
     // starting values for search
-    minimum = diff[0];
+    minimum = fabs(x[0]-xref); //diff[0];
     minindex=0;
 
     // minimum search
     for (i = 1; i < length; ++i) {
-        if (minimum > diff[i]) {
-            minimum = diff[i];
+    	diff=fabs(x[i]-xref);
+        if (minimum > diff) {
+            minimum = diff;
             minindex=i;
         }
     }
 
-    free(diff);
+    //free(diff);
 
     return minindex;
 }
