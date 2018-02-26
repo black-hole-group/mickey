@@ -590,3 +590,29 @@ choice can affect some specific transformations.
 
 
 
+	def yt2d(self):
+		"""
+	Converts 2d arrays to the 3d format that is understood
+	by the yt package. Make sure the arrays are in a cartesian
+	coord. basis.
+
+	Inspired by this example: http://stackoverflow.com/questions/7372316/how-to-make-a-2d-numpy-array-a-3d-array
+		"""
+		self.X1_3d=self.X1[..., numpy.newaxis]
+		self.X2_3d=self.Y1[..., numpy.newaxis]
+
+		self.rho3d=self.rhoc.T[..., numpy.newaxis]
+		self.p3d=self.pc.T[..., numpy.newaxis]
+
+		self.vx3d=self.vxc.T[..., numpy.newaxis]
+		self.vy3d=self.vyc.T[..., numpy.newaxis]
+		self.vz3d=self.vzc.T[..., numpy.newaxis]
+		self.v3d=self.vc.T[..., numpy.newaxis]
+
+
+
+
+
+
+
+

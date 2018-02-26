@@ -8,7 +8,7 @@ CFLAGS	= -c -fPIC -O2 -fopenmp
 pyv=$(shell python -c 'import sys; print(sys.version_info[0])')
 # takes action depending on the version
 ifeq ($(pyv),3)
-	LFLAGS  = -I/Users/nemmen/anaconda3/include/python3.5m -I/Users/nemmen/anaconda3/lib/python3.5/site-packages/numpy/core/include
+	LFLAGS  = -I/Users/nemmen/anaconda3/include/python3.5m -I/Users/nemmen/anaconda3/lib/python3.5/site-packages/numpy/core/include 
 else 
 	LFLAGS  = -I/Users/nemmen/anaconda3/envs/py27/include/python2.7 -I/Users/nemmen/anaconda3/envs/py27/lib/python2.7/site-packages/numpy/core/include
 endif 
