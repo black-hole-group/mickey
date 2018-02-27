@@ -307,8 +307,7 @@ class Pluto:
 	Detailed explanation of procedure available on 
 	https://github.com/black-hole-group/group-wiki/blob/master/pluto-analysis-tutorial-02-colormaps-and-regridding.ipynb
 
-	:param :
-	:returns:
+	:returns: required number of elements along each direction in cartesian grid
 		"""
 		# total area of cartesian grid
 		area_car=self.x1[-1]**2 
@@ -591,7 +590,7 @@ choice can affect some specific transformations.
 
 
 
-	def regridGPU(self, n=None, xlim = None):
+	def regridGPU(self, n=None, xlim = None, GPU=True):
 		"""
 Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
 into a uniform grid in the same coordinates. Uses a GPU acceleration
@@ -607,7 +606,7 @@ choice can affect some specific transformations.
 More info about this implementation on jupyter notebook "pluto debug
 regridFast".
 		"""
-		import nmmn.lsd, nmmn.misc
+		import nmmn.misc
 		import pyopencl as cl  
 
 		# creates copy of current object which will have the new
@@ -643,9 +642,12 @@ regridFast".
 		# ===========================================================
 		# gets device for GPU
 		platforms=cl.get_platforms()
-		devices=platforms[0].get_devices(cl.device_type.GPU)
+		if GPU:
+			devices=platforms[0].get_devices(cl.device_type.GPU)
+		else:
+			devices=platforms[0].get_devices(cl.device_type.CPU)
+
 		context=cl.Context([devices[0]])
-		#context = cl.create_some_context()
 		queue = cl.CommandQueue(context)
 		mf = cl.mem_flags
 
@@ -689,7 +691,8 @@ regridFast".
 		vz_d = cl.Buffer(context, mf.WRITE_ONLY, rho_h.nbytes)
 
 		# ## Execute kernel
-		kernel=open('fastregrid.cl').read()
+		kernelFile=nmmn.misc.findPATH('fastregrid.cl') # find full path to kernel source code
+		kernel=open(kernelFile).read()
 		program = cl.Program(context, kernel).build()
 
 		program.regrid(queue, rho_h.shape, None, numpy.int32(xnew.size), xnew_d, numpy.int32(ynew.size), ynew_d, numpy.int32(r.size), r_d, numpy.int32(th.size), th_d, rhoin_d, pin_d, v1in_d, v2in_d, v3in_d, rho_d, p_d, vx_d, vy_d, vz_d)
@@ -705,6 +708,9 @@ regridFast".
 		# END OF OPENCL PART
 
 
+
+		# Assigns object attributes
+		# ===========================
 
 		# coordinate arrays
 		obj.x1,obj.x2=xnew,ynew # cartesian coords, 1D
