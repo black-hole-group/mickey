@@ -17,6 +17,13 @@
 # • ffmpeg
 #
 
+# check if there were command-line arguments
+if [ $# -eq 0 ]; then
+    echo "Usage: "
+    echo "  movie.sh <image format (png, jpg etc)> <frames/second> <filename without extension> "
+    exit 1
+fi
+
 bitrate=900
 
 # creates sequential list of files that will be rendered
