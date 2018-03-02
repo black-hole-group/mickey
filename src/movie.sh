@@ -1,9 +1,15 @@
 #!/bin/sh
 # 
-# Creates movie file based on sequential images.
+# Creates movie file based on sequential images in the current directory.
 #
-# Usage: movie.sh <fps> <image extension> <output file basename>
-# 	e.g. movie.sh 5 png movie
+# Usage: movie.sh <image extension> <fps> <output file basename>
+#
+# Example:
+#
+# $ movie.sh png 5 movie
+#
+# 	will create a movie from all *.png files in the directory, at 5 frames
+# 	per second, and create a file movie.mov.
 #
 # Requirements:
 # 
@@ -11,15 +17,22 @@
 # • ffmpeg
 #
 
+# check if there were command-line arguments
+if [ $# -eq 0 ]; then
+    echo "Usage: "
+    echo "  movie.sh <image format (png, jpg etc)> <frames/second> <filename without extension> "
+    exit 1
+fi
+
 bitrate=900
 
 # creates sequential list of files that will be rendered
-ls plot.*.$2 | sort -n -t . -k 2 > list.txt
+ls *.$1 | sort -n -t . -k 2 > list.txt
 
-mencoder "mf://@list.txt" -mf fps=$1 -o $3.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=$bitrate
+mencoder "mf://@list.txt" -mf fps=$2 -o $3.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=$bitrate
 
-# Quicktime compatible movie (OS X)
-# ===========================
+# Quicktime compatible movie (MacOS)
+# ====================================
 # http://www.mplayerhq.hu/DOCS/HTML/en/menc-feat-quicktime-7.html
 
 # pass 1
