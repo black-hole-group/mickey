@@ -451,10 +451,11 @@ into a uniform grid in the same coordinates.
 
 		# figures out optimal size of cartesian grid
 		if n is None:
-			#n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
-			#n=int(n)
 			n=self.optimalgrid()
-			print(n)
+
+			# let's avoid dealing with arrays which are too large
+			if n>3000:
+				n=3000
 
 		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
 			xnew=numpy.linspace(0, xlim, n)
@@ -534,9 +535,11 @@ choice can affect some specific transformations.
 
 		# figures out optimal size of cartesian grid
 		if n is None:
-			#n=numpy.sqrt(self.x1.size*self.x2.size)*2	# notice the factor of 2
-			#n=int(n)
 			n=self.optimalgrid()
+
+			# let's avoid dealing with arrays which are too large
+			if n>3000:
+				n=3000
 
 		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
 			xnew=numpy.linspace(0, xlim, n)
