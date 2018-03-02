@@ -626,6 +626,10 @@ regridFast".
 		# figures out optimal size of cartesian grid
 		if n is None:
 			n=self.optimalgrid()
+			
+			# let's avoid dealing with arrays which are too large
+			if n>3000:
+				n=3000
 
 		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
 			xnew=numpy.linspace(0, xlim, n)
