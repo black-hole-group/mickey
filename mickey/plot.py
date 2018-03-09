@@ -109,7 +109,7 @@ Example
 
     # crops arrays
     v1crop, X1crop, X2crop = nmmn.lsd.crop(obj.v1, obj.X1, obj.X2, x0,x1,y0,y1,all=True)
-    v2crop = nmmn.lsd.crop(obj.v2, obj.X1, obj.X2, 0,2,-1,1)
+    v2crop = nmmn.lsd.crop(obj.v2, obj.X1, obj.X2, x0,x1,y0,y1)
 
     pylab.streamplot(X1crop, X2crop, v1crop, v2crop, *arg, **args)
 
