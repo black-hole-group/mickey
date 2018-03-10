@@ -307,8 +307,7 @@ class Pluto:
 	Detailed explanation of procedure available on 
 	https://github.com/black-hole-group/group-wiki/blob/master/pluto-analysis-tutorial-02-colormaps-and-regridding.ipynb
 
-	:param :
-	:returns:
+	:returns: required number of elements along each direction in cartesian grid
 		"""
 		# total area of cartesian grid
 		area_car=self.x1[-1]**2 
@@ -588,6 +587,175 @@ choice can affect some specific transformations.
 		obj.mass=self.mass
 
 		return obj
+
+
+
+
+
+
+	def regridGPU(self, n=None, xlim = None, GPU=True):
+		"""
+Transforms a mesh in arbitrary coordinates (e.g. nonuniform elements)
+into a uniform grid in the same coordinates. Uses a GPU acceleration
+through OpenCL to speed things up. 
+
+One has to be particularly careful below about using a polar angle
+(-pi/2<theta<pi/2) vs a spherical polar angle (0<theta_sph<pi). The
+choice can affect some specific transformations.
+
+:param n: New number of elements n^2. If None, figures out by itself
+:param xlim: Boundary for the plot and the grid
+
+More info about this implementation on jupyter notebook "pluto debug
+regridFast".
+		"""
+		import nmmn.misc
+		import pyopencl as cl  
+
+		# creates copy of current object which will have the new
+		# coordinates
+		obj=Pluto() # empty pluto object
+
+		# r, theta
+		r=self.x1
+		th=-(self.x2-numpy.pi/2.) # spherical angle => polar angle
+		if(xlim == None):
+				xlim = self.x1.max()
+		gmtry = self.pp.geometry
+
+		# figures out optimal size of cartesian grid
+		if n is None:
+			n=self.optimalgrid()
+			
+			# let's avoid dealing with arrays which are too large
+			if n>3000:
+				n=3000
+
+		if(gmtry == "SPHERICAL" or gmtry == "CYLINRICAL"):
+			xnew=numpy.linspace(0, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+		else:
+			xnew=numpy.linspace(-xlim, xlim, n)
+			ynew=numpy.linspace(-xlim, xlim, n)
+
+		# output arrays that will be incorporated in a new Pluto object
+		rho=numpy.zeros((n,n))
+		vx=numpy.zeros((n,n))
+		vy=numpy.zeros((n,n))
+		vz=numpy.zeros((n,n)) # vphi
+		p=rho.copy()
+
+		# OPENCL SETUP
+		# ===========================================================
+		# gets device for GPU
+		platforms=cl.get_platforms()
+		if GPU:
+			devices=platforms[0].get_devices(cl.device_type.GPU)
+		else:
+			devices=platforms[0].get_devices(cl.device_type.CPU)
+
+		context=cl.Context([devices[0]])
+		queue = cl.CommandQueue(context)
+		mf = cl.mem_flags
+
+		# ## Host variables
+		# Define host arrays with appropriate precision, suffix `_h`. 
+		# First the input arrays
+		xnew_h = xnew.astype(numpy.float32)
+		ynew_h = ynew.astype(numpy.float32)
+		r_h = r.astype(numpy.float32)
+		th_h = th.astype(numpy.float32)
+		rhoin_h = self.rho.astype(numpy.float32)
+		pin_h = self.p.astype(numpy.float32)
+		v1in_h = self.v1.astype(numpy.float32)
+		v2in_h = self.v2.astype(numpy.float32)
+		v3in_h = self.v3.astype(numpy.float32)
+
+		# then the output arrays
+		rho_h = rho.astype(numpy.float32)
+		p_h = p.astype(numpy.float32)
+		vx_h = vx.astype(numpy.float32)
+		vy_h = vy.astype(numpy.float32)
+		vz_h = vz.astype(numpy.float32)
+
+		# ## Device variables
+		# Buffers, suffix `_d`. Input arrays
+		xnew_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=xnew_h)
+		ynew_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=ynew_h)
+		r_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=r_h)
+		th_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=th_h)
+		rhoin_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=rhoin_h)
+		pin_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=pin_h)
+		v1in_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=v1in_h)
+		v2in_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=v2in_h)
+		v3in_d = cl.Buffer(context, mf.READ_ONLY | mf.COPY_HOST_PTR, hostbuf=v3in_h)
+
+		# Output arrays
+		rho_d = cl.Buffer(context, mf.WRITE_ONLY, rho_h.nbytes)
+		p_d = cl.Buffer(context, mf.WRITE_ONLY, rho_h.nbytes)
+		vx_d = cl.Buffer(context, mf.WRITE_ONLY, rho_h.nbytes)
+		vy_d = cl.Buffer(context, mf.WRITE_ONLY, rho_h.nbytes)
+		vz_d = cl.Buffer(context, mf.WRITE_ONLY, rho_h.nbytes)
+
+		# ## Execute kernel
+		kernelFile=nmmn.misc.findPATH('fastregrid.cl') # find full path to kernel source code
+		kernel=open(kernelFile).read()
+		program = cl.Program(context, kernel).build()
+
+		program.regrid(queue, rho_h.shape, None, numpy.int32(xnew.size), xnew_d, numpy.int32(ynew.size), ynew_d, numpy.int32(r.size), r_d, numpy.int32(th.size), th_d, rhoin_d, pin_d, v1in_d, v2in_d, v3in_d, rho_d, p_d, vx_d, vy_d, vz_d)
+
+		# ## Gathers output
+		cl.enqueue_copy(queue, rho_h, rho_d)
+		cl.enqueue_copy(queue, p_h, p_d)
+		cl.enqueue_copy(queue, vx_h, vx_d)
+		cl.enqueue_copy(queue, vy_h, vy_d)
+		cl.enqueue_copy(queue, vz_h, vz_d)
+
+		# ===========================================================
+		# END OF OPENCL PART
+
+
+
+		# Assigns object attributes
+		# ===========================
+
+		# coordinate arrays
+		obj.x1,obj.x2=xnew,ynew # cartesian coords, 1D
+		obj.X1,obj.X2=numpy.meshgrid(xnew,ynew) # cartesian coords, 2D
+		obj.r, obj.th = nmmn.misc.cart2pol(xnew, ynew) # polar coords, 1D
+		obj.R, obj.TH = numpy.meshgrid(obj.r,obj.th) # polar coords, 2D
+		obj.rsp, obj.thsp = obj.r, numpy.pi/2.-obj.th # spherical polar angle, 1D
+		obj.RSP, obj.THSP = numpy.meshgrid(obj.rsp,obj.thsp) # spherical polar coords, 2D
+
+		# velocities
+		obj.v1,obj.v2,obj.v3 = vx_h,vy_h,vz_h # Cartesian components
+		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.TH,obj.v1,obj.v2) # polar components
+		obj.speed = numpy.sqrt(obj.v1**2+obj.v2**2+obj.v3**3)
+
+		# fluid variables
+		obj.gamma=self.gamma
+		obj.rho,obj.p=rho_h,p_h
+		obj.entropy=numpy.log(obj.p/obj.rho**obj.gamma)
+		obj.am=obj.v3*obj.R*numpy.sin(obj.THSP) # specific a. m., vphi*r*sin(theta)
+		obj.Be=obj.speed**2/2.+obj.gamma*obj.p/((obj.gamma-1.)*obj.rho)-1./obj.R	# Bernoulli function
+		obj.Omega=obj.v3/obj.R	# angular velocity
+
+		# misc info
+		obj.regridded=True # flag to tell whether the object was previously regridded
+		obj.t=self.t
+		obj.frame=self.frame
+		obj.mdot=self.mdot
+		obj.mass=self.mass
+
+		return obj
+
+
+
+
+
+
+
+
 
 
 
