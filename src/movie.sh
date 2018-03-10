@@ -27,7 +27,8 @@ fi
 bitrate=900
 
 # creates sequential list of files that will be rendered
-ls *.$1 | sort -n -t . -k 2 > list.txt
+#ls *.$1 | sort -n -t . -k 2 > list.txt
+ls *.$1 | sort --version-sort > list.txt
 
 mencoder "mf://@list.txt" -mf fps=$2 -o $3.avi -ovc lavc -lavcopts vcodec=msmpeg4v2:vbitrate=$bitrate
 
