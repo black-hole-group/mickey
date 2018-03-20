@@ -11,7 +11,12 @@ for convenience.
 :param bh: plots circle centered on the origin to illustrate the inner boundary. Can be specified as either a float or a list [float,string] ([radius,color string], e.g. [1,'w'])
 :param file: should we output a graphic file with the plot?
 :param n: number of cartesian grid points per dimension, total number of points = n^2 
-:param vmax: cuts the upper value displayed in the image to vmax. Useful when creating a movie, to avoid the flickering effect
+
+Example:
+
+>>> mickey.plot.density(mickey.mickey.Pluto(107),lim=1, bh=[0.1,'w'], vmin=-4, vmax=0)
+
+will plot the 107th snapshot, performing regridding if necessary.
     """
     # gets arrays in a cartesian grid, stored in a new object p
     if hasattr(obj, 'regridded'):
@@ -47,6 +52,76 @@ for convenience.
     
     if file is True:
         pylab.savefig('plot.'+str(obj.frame)+'.png',transparent=True,dpi=300)
+
+
+
+
+
+
+def densityn(i,lim=None, bh=None, file=False, n=None, *arg, **args):
+    """
+Plots the density scalar field for a Pluto simulation. Offers several options
+for convenience. 
+
+:param i: integer specifying the simulation frame you desire to plot
+:param lim: specify bounding box for plot 
+:param bh: plots circle centered on the origin to illustrate the inner boundary. Can be specified as either a float or a list [float,string] ([radius,color string], e.g. [1,'w'])
+:param file: should we output a graphic file with the plot?
+:param n: number of cartesian grid points per dimension, total number of points = n^2 
+
+Example:
+
+>>> mickey.plot.density(107,lim=1, bh=[0.1,'w'], vmin=-4, vmax=0)
+
+will plot the 107th snapshot, performing regridding if necessary.
+    """
+    from . import mickey
+
+    p=mickey.Pluto(i, stdout=False)
+
+    # crops arrays
+    rho, X1, X2 = nmmn.lsd.crop(obj.v1, obj.X1, obj.X2, x0,x1,y0,y1,all=True)
+
+    # gets arrays in a cartesian grid, stored in a new object p
+    if n is None:
+        c=p.regridFast(1500)
+    else:
+        c=p.regridFast(n) 
+        
+    pylab.clf()
+    pylab.imshow(numpy.log10(p.rho),extent=[p.x1[0],p.x1[-1],p.x2[0],p.x2[-1]], *arg, **args)
+
+    if lim is not None:
+        pylab.xlim(0,2*lim)
+        pylab.ylim(-lim,lim)
+
+    pylab.xlabel('$x$')
+    pylab.ylabel('$y$')
+    pylab.axes().set_aspect('equal')
+    cbar=pylab.colorbar()
+    cbar.set_label("$\log \\rho$")
+    pylab.title('$t= $'+str( round(obj.t/(2.*numpy.pi),2) ) + ", $\\rho_{\\rm max}$ = " + str(round(p.rho.max(),2)) )
+    
+    # black hole
+    if bh is not None:
+        if numpy.size(bh)==1:
+            circle2=pylab.Circle((0,0),bh,color='k')
+        else:
+            circle2=pylab.Circle((0,0),bh[0],color=bh[1])
+
+        pylab.gca().add_artist(circle2)
+    
+    if file is True:
+        pylab.savefig('plot.'+str(obj.frame)+'.png',transparent=True,dpi=300)
+
+
+
+
+
+
+
+
+
 
 
 

@@ -59,6 +59,18 @@ def angleAvg(thArr,arr,theta0,theta1):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 class Pluto:
 	"""
 	Class that defines data objects imported from PLUTO.
@@ -756,11 +768,6 @@ regridFast".
 
 
 
-
-
-
-
-
 	def yt2d(self):
 		"""
 	Converts 2d arrays to the 3d format that is understood
@@ -782,6 +789,67 @@ regridFast".
 
 
 
+
+
+	def crop(self, xmin, xmax):
+		"""
+	Crops all fields within the specified radial range given in xmin and xmax.
+	Returns a new Pluto object with cropped arrays.
+	This is useful when you are not interested in plotting the whole domain
+	but only a subset; potential of speeding up things.
+
+	>>> cropped_p = p.crop(0,10)
+
+	where p is a previous Pluto object and cropped_p is the new one containing
+	the cropped arrays.
+
+	:param xmin,xmax: minimum and maximal radii
+	:returns: Pluto object with cropped fields
+		"""
+		import nmmn.misc
+		
+		# creates copy of current object which will have the new
+		# coordinates
+		obj=Pluto() # empty pluto object
+
+		i=numpy.where((self.X1[0,:]>=xmin) & (self.X1[0,:]<=xmax))
+		#j=numpy.where((y[:,0]>=ymin) & (y[:,0]<=ymax))
+		i=i[0]
+
+
+		# Assigns object attributes
+		# ===========================
+
+		# coordinate arrays
+		obj.x1,obj.x2=self.x1[i[0]:i[-1]], self.x2 # cartesian coords, 1D
+		obj.X1,obj.X2=self.X1[:,i[0]:i[-1]], self.X2[:,i[0]:i[-1]] # cartesian coords, 2D
+		obj.r, obj.th = nmmn.misc.cart2pol(obj.x1, obj.x2) # polar coords, 1D
+		obj.R, obj.TH = numpy.meshgrid(obj.r,obj.th) # polar coords, 2D
+		obj.rsp, obj.thsp = obj.r, numpy.pi/2.-obj.th # spherical polar angle, 1D
+		obj.RSP, obj.THSP = numpy.meshgrid(obj.rsp,obj.thsp) # spherical polar coords, 2D
+
+		# velocities
+		obj.v1,obj.v2,obj.v3 = self.v1[i[0]:i[-1],:],self.v2[i[0]:i[-1],:],self.v3[i[0]:i[-1],:] # Cartesian components
+		obj.vr, obj.vth = nmmn.misc.vel_c2p(obj.TH,obj.v1,obj.v2) # polar components
+		obj.speed = numpy.sqrt(obj.v1**2+obj.v2**2+obj.v3**3)
+
+		# fluid variables
+		obj.gamma=self.gamma
+		obj.rho,obj.p=self.rho[i[0]:i[-1],:],self.p[i[0]:i[-1],:]
+		obj.entropy=numpy.log(obj.p/obj.rho**obj.gamma)
+		obj.am=obj.v3*obj.R*numpy.sin(obj.THSP) # specific a. m., vphi*r*sin(theta)
+		obj.Be=obj.speed**2/2.+obj.gamma*obj.p/((obj.gamma-1.)*obj.rho)-1./obj.R	# Bernoulli function
+		obj.Omega=obj.v3/obj.R	# angular velocity
+
+		# misc info
+		obj.regridded=True # flag to tell whether the object was previously regridded
+		obj.t=self.t
+		obj.frame=self.frame
+		obj.mdot=self.mdot
+		obj.mass=self.mass
+
+		return obj
+		
 
 
 
