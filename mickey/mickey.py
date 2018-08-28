@@ -499,7 +499,7 @@ into a uniform grid in the same coordinates.
 						print("Geometry not supported. Improve the method.")
 		# *****END BOTTLENECK*****
 
-	#set new variables to null object
+		#set new variables to null object
 		obj.x1,obj.x2=xnew,ynew
 		obj.rho,obj.p=rho,p
 		obj.v1,obj.v2 = vx,vy
