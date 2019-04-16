@@ -12,23 +12,24 @@ PYV_MIN := $(shell python -c 'import sys; print(sys.version_info[1])')
 OS := $(shell uname)
 
 # if the user is running MacOS
-ifeq ($(UNAME), Darwin)
+ifeq ($(OS), Darwin)
 	# takes action depending on the python version
-	ifeq ($(pyv),3)
+	ifeq ($(PYV),3)
 		LFLAGS  = -I$(HOME)/anaconda3/include/python3.$(PYV_MIN)m -I$(HOME)/anaconda3/lib/python3.$(PYV_MIN)/site-packages/numpy/core/include 
 	else 
 		# improve: find the path below automatically
-		LFLAGS  = -I$(HOME)/anaconda3/envs/py27/include/python2.7 -I$(HOME)/anaconda3/envs/py27/lib/python2.7/site-packages/numpy/core/include
+		LFLAGS  = -I$(HOME)/anaconda2/envs/py27/include/python2.7 -I$(HOME)/anaconda2/envs/py27/lib/python2.7/site-packages/numpy/core/include
 	endif 
 endif
 # if the user is running Linux
-ifeq ($(UNAME), Linux)
-	ifeq ($(pyv),3)
-		LFLAGS  = -I$(HOME)/anaconda2/include/python2.7 -I$(HOME)/anaconda2/lib/python2.7/site-packages/numpy/core/include
-	else 
+ifeq ($(OS), Linux)
+	ifeq ($(PYV),3)
 		LFLAGS  = -I$(HOME)/anaconda3/include/python3.$(PYV_MIN)m -I$(HOME)/anaconda3/lib/python3.$(PYV_MIN)/site-packages/numpy/core/include
+	else 
+		LFLAGS  = -I$(HOME)/anaconda2/include/python2.7 -I$(HOME)/anaconda2/lib/python2.7/site-packages/numpy/core/include
 	endif 
 endif
+
 
 
 all: ${PROGRAM}
