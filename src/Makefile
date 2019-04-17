@@ -2,7 +2,7 @@
 PROGRAM	= fastregrid
 
 CC	= pgcc
-CFLAGS	= -acc -fPIC -O2 -Minfo=accel -c
+CFLAGS	= -acc -fPIC -O2 -Minfo=accel -c -ta=tesla:nordc
 
 # determines which python version the user has
 PYV := $(shell python -c 'import sys; print(sys.version_info[0])')
