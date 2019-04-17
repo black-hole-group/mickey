@@ -14,13 +14,13 @@ Assorted methods and classes to handle and visualize the output of the [Pluto MH
 
 # Installation
 
-1. Make sure you have `pyPluto` installed (ignore this step if you already installed it):
+1.. Make sure you have `pyPluto` installed (ignore this step if you already installed it):
 
 ```shell 
 git clone git@github.com:black-hole-group/pyPLUTO.git
 ```
 
-2. Install `Mickey`,
+2.. Install `Mickey`,
 
 ```shell
 git clone git@bitbucket.org:nemmen/mickey.git
@@ -45,24 +45,20 @@ python setup.py develop
 
 This last method is preferred since it allows for easily updating Mickey to the latest changes in the repo (`git pull`). You may need to run the last command with `sudo`. Also, if the C extension source code was updated, you will need to recompile these extensions.
 
-3. Install [`nmmn`](https://github.com/rsnemmen/nmmn) (ignore this step if you already installed it)
+3.. Install [`nmmn`](https://github.com/rsnemmen/nmmn) (ignore this step if you already installed it)
 
-```shell
-git clone git@github.com:rsnemmen/nmmn.git
-cd nmmn
-python setup.py develop 
-```
+    pip install nmmn
 
-`nmmn` and `Mickey` are being continuously updated. To update to the latest versions, just `cd` to the directory where you first cloned these repos and issue a `git pull`. 
+Keep in mind that `nmmn` and `Mickey` are being continuously updated. To get their bleeding-edge versions, it is recommended to install using the `python setup.py develop` method, `cd` to the directory where the packages are located and issue a `git pull`. 
 
-4. Setup environment variables for Pluto and the python scripts, to make sure that they will be found when needed
+4.. Setup environment variables for Pluto and the python scripts, to make sure that they will be found when needed
 
 ```shell
 export PLUTO_DIR=/home/user/pluto
 export PYTHONPATH=/home/user/pyPLUTO:/home/user/mickey/src:$PYTHONPATH
 ```
 
-Add the above lines to your `.bash_profile` or `.bashrc` file for convenience.
+Add the above lines to your `.bash_profile` (MacOS) or `.bashrc` (Linux) file for convenience.
 
 ## C extensions
 
@@ -92,6 +88,14 @@ The *c* object's attributes are now:
 
 ## Lots of more examples
 
+regridding a simulated mesh 
+
+plotting
+
+computing mdot
+
+
+
 # Branch explanation
 
 - `master`: stable branch, with recommended optimizations (one hopes)
@@ -107,4 +111,5 @@ The *c* object's attributes are now:
 - [x] a.m. 
 - [ ] compute how much mass was lost from the volume due to outflows
 - [x] script to mirror local files to `alphacrucis`, for easy compilation
+- [ ] more examples
 
