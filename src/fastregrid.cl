@@ -31,7 +31,7 @@ int search(float xref, int length, global float *x) {
 __kernel void regrid(const int nxnew, __global const float *xnew, const int nynew, __global const float *ynew, const int n1, __global const float *r, const int n2, __global const float *th, __global const float *rho, __global const float *p, __global const float *v1, __global const float *v2, __global const float *v3, __global float *rhonew, __global float *pnew, __global float *vx, __global float *vy, __global float *vz) {
 	int i = get_global_id(0);
     int j = get_global_id(1);
-    int nnew=j*nxnew+i; 
+    int nnew=j*nxnew+i; //i*nynew+j;
 
     int iref, jref, nref;
 	float rnew,thnew;
@@ -45,7 +45,7 @@ __kernel void regrid(const int nxnew, __global const float *xnew, const int nyne
 		// locates position in old coordinate arrays
 		iref=search(rnew,n1,r);
 		jref=search(thnew,n2,th);
-		nref=jref*n1+iref; 
+		nref=jref*n1+iref; //iref*n2+jref;	
 
 		// assigns arrays in new coord. basis
 		rhonew[nnew]=rho[nref];

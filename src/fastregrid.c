@@ -1,5 +1,6 @@
 #include "fastregrid.h"
 
+#pragma acc routine vector
 int search(double xref, int length, double *x) {
     /* 
     Returns the index corresponding to the element in array x with
@@ -48,7 +49,7 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 	double rnew,thnew;
 
 	// goes through new array
-    #pragma acc data copyout(rhonew, pnew, vx, vy, vz) copyin(xnew,ynew,r,th,rho,p,v1,v2,v3)  
+    #pragma acc data copyout(rhonew[0:nxnew*nynew], pnew[0:nxnew*nynew], vx[0:nxnew*nynew], vy[0:nxnew*nynew], vz[0:nxnew*nynew]) copyin(xnew[0:nxnew],ynew[0:nynew],r[0:n1],th[0:n2],rho[0:n1*n2],p[0:n1*n2],v1[0:n1*n2],v2[0:n1*n2],v3[0:n1*n2])  
     {
 	#pragma acc parallel loop collapse(2)
 	for (i=0; i<nxnew; i++) {
