@@ -1,6 +1,6 @@
 #include "fastregrid.h"
 
-#pragma acc routine vector
+#pragma acc routine seq
 int search(double xref, int length, double *x) {
     /* 
     Returns the index corresponding to the element in array x with
@@ -74,8 +74,8 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 			vx[nnew]=v1[nref]*cos(th[jref])-v2[nref]*sin(th[jref]);
 			vy[nnew]=v1[nref]*sin(th[jref])+v2[nref]*cos(th[jref]);			
 			vz[nnew]=v3[nref]; // vphi
-		}	// end acc kernels
-	}
+		}	
+	} // end acc kernels
 	} // end acc data region
 }
 
