@@ -1,8 +1,8 @@
 # put here the root name of your code
 PROGRAM	= fastregrid
 
-CC	= gcc
-CFLAGS	= -c -fPIC -O3 
+CC	= pgcc
+CFLAGS	= -acc -fPIC -O2 -Minfo=accel
 
 # determines which python version the user has
 PYV := $(shell python -c 'import sys; print(sys.version_info[0])')

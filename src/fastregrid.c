@@ -48,7 +48,9 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 	double rnew,thnew;
 
 	// goes through new array
-	#pragma omp parallel for private(j,nnew,rnew,thnew,iref,jref,nref) collapse(2)
+    #pragma acc data copyout(rhonew, pnew, vx, vy, vz) copyin(xnew,ynew,r,th,rho,p,v1,v2,v3)  
+    {
+	#pragma acc parallel loop collapse(2)
 	for (i=0; i<nxnew; i++) {
 		for (j=0; j<nynew; j++) {
   			// Need to use 1D index for accessing array elements 
@@ -71,7 +73,8 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 			vx[nnew]=v1[nref]*cos(th[jref])-v2[nref]*sin(th[jref]);
 			vy[nnew]=v1[nref]*sin(th[jref])+v2[nref]*cos(th[jref]);			
 			vz[nnew]=v3[nref]; // vphi
-		}
+		}	// end acc kernels
 	}
+	} // end acc data region
 }
 
