@@ -7,8 +7,18 @@
 # put here the root name of your code
 PROGRAM	= fastregrid
 
+# By default, the code runs on NVIDIA GPUs and the line below is 
+# commented out. Uncomment it if you want to use the CPU instead
+#CPUFLAGS = -ta=multicore
+
 CC	= pgcc
-CFLAGS	= -acc -Minfo=accel -ta=tesla:nordc
+CFLAGS	= -acc -Minfo=accel
+
+ifdef CPUFLAGS
+	CFLAGS	+= $(CPUFLAGS)
+else # GPU flags
+	CFLAGS	+= -ta=tesla:nordc
+endif
 
 # determines which python version the user has
 PYV := $(shell python -c 'import sys; print(sys.version_info[0])')
