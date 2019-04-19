@@ -71,11 +71,12 @@ for convenience.
 
 Example:
 
->>> mickey.plot.density(107,lim=1, bh=[0.1,'w'], vmin=-4, vmax=0)
+>>> mickey.plot.densityn(107,lim=1, bh=[0.1,'w'], vmin=-4, vmax=0)
 
 will plot the 107th snapshot, performing regridding if necessary.
     """
     from . import mickey
+    import nmmn.lsd
 
     p=mickey.Pluto(i, stdout=False)
 

@@ -83,7 +83,7 @@ GPUs can speed up regridding by a factor of 5-100 compared to CPU times.
 
 # Usage
 	
-Please see the [jupyter notebook](https://nbviewer.jupyter.org/urls/bitbucket.org/nemmen/mickey/raw/6c6999626ce7f34e68bbc5edc0a23675ff496c4a/mickey-tutorial.ipynb) (`mickey-tutorial.ipynb`) which has several examples on how to use Mickey.
+Please see the jupyter notebook `mickey-tutorial.ipynb` which has several examples on how to use Mickey.
 
 
 # Branch explanation
