@@ -75,7 +75,7 @@ Note that you need the PGI compiler to use the C-extensions.
 ---
 **NOTE**
 
-GPUs can speed up regridding by a factor of 5-100 compared to CPU times.
+GPUs can speed up regridding by a factor of 100 compared to CPU w/ pure Python (`regrid`), and 5-10x compared to CPU w/ C.
 
 ---
 
@@ -89,7 +89,7 @@ Please see the jupyter notebook `mickey-tutorial.ipynb` which has several exampl
 # Branch explanation
 
 - `master`: stable branch, with recommended optimizations (one hopes)
-- `openacc`: fast and furious regridding. Needs a NVIDIA GPU in the system
+- `openacc`: fast and furious regridding. NVIDIA GPU recommended for max speed
 - `swig`: C-extensions for faster regridding, incorporated through `SWIG`. Serial code
 - `openmp`: C-extensions for optimization, SWIG interface, OpenMP acceleration. Very similar to branch `swig`
 - `opencl`: ~~by far the fastest optimization,~~ incorporated using C and `PyOpenCL`
