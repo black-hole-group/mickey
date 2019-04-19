@@ -81,36 +81,9 @@ GPUs can speed up regridding by a factor of 5-100 compared to CPU times.
 
 
 
-# Simple examples 
+# Usage
 	
-TODO: put these examples in a jupyter notebook
-	
-## To read the simulation output for snapshot 10 (e.g. rho.0010.dbl etc):
-	
-```python 
-import mickey
-c=mickey.Pluto(10)
-```
-
-The *c* object's attributes are now:
-	
-- grid: *x1,x2,x3*
-- velocities: *v1,v2,v3*
-- pressure *p*
-- density *rho*
-- number of grid cells: *n1,n2,n3*
-
-
-## Lots of more examples
-
-regridding a simulated mesh on a CPU
-
-regridding on a GPU (switching branches)
-
-plotting
-
-computing mdot
-
+Please see the [jupyter notebook](https://nbviewer.jupyter.org/urls/bitbucket.org/nemmen/mickey/raw/6c6999626ce7f34e68bbc5edc0a23675ff496c4a/mickey-tutorial.ipynb) (`mickey-tutorial.ipynb`) which has several examples on how to use Mickey.
 
 
 # Branch explanation
