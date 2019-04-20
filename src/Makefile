@@ -1,4 +1,9 @@
-# please see the following links for explanations on the options
+# By default, the code runs on NVIDIA GPUs. To compile with 
+# CPU support, use
+# 
+#     make CPU=1
+#
+# Please see the following links for explanations on some options
 # used below:
 #
 # https://www.pgroup.com/userforum/viewtopic.php?p=25142#25142
@@ -7,15 +12,11 @@
 # put here the root name of your code
 PROGRAM	= fastregrid
 
-# By default, the code runs on NVIDIA GPUs and the line below is 
-# commented out. Uncomment it if you want to use the CPU instead
-#CPUFLAGS = -ta=multicore
-
 CC	= pgcc
 CFLAGS	= -acc -Minfo=accel
 
-ifdef CPUFLAGS
-	CFLAGS	+= $(CPUFLAGS)
+ifdef CPU
+	CFLAGS	+= -ta=multicore
 else # GPU flags
 	CFLAGS	+= -ta=tesla:nordc
 endif
