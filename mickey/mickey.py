@@ -9,6 +9,7 @@ import os
 import matplotlib.pyplot as pylab
 from scipy import ndimage
 import scipy.interpolate
+import nmmn.misc
 
 
 
@@ -123,6 +124,7 @@ class Pluto:
 			self.X1,self.X2=numpy.meshgrid(self.x1,self.x2)
 			self.DX1,self.DX2=numpy.meshgrid(self.dx1,self.dx2)
 			self.R,self.TH=numpy.meshgrid(self.r,self.th)
+			self.X,self.Y=nmmn.misc.pol2cart(self.R,self.TH)
 
 			# fluid variables
 			self.p=d.prs # pressure
@@ -447,7 +449,7 @@ into a uniform grid in the same coordinates.
 
 .. todo:: speed this up with C, the loops slow this down in python.
 		"""
-		import nmmn.lsd, nmmn.misc
+		import nmmn.lsd
 
 		# creates copy of current object which will have the new
 		# coordinates
@@ -527,7 +529,7 @@ choice can affect some specific transformations.
 :param n: New number of elements n^2. If None, figures out by itself
 :param xlim: Boundary for the plot and the grid
 		"""
-		import nmmn.lsd, nmmn.misc
+		import nmmn.lsd
 
 		# C function for fast regridding. Make sure you compile it first
 		# with make
@@ -621,7 +623,6 @@ choice can affect some specific transformations.
 More info about this implementation on jupyter notebook "pluto debug
 regridFast".
 		"""
-		import nmmn.misc
 		import pyopencl as cl  
 
 		# creates copy of current object which will have the new
@@ -805,9 +806,7 @@ regridFast".
 
 	:param xmin,xmax: minimum and maximal radii
 	:returns: Pluto object with cropped fields
-		"""
-		import nmmn.misc
-		
+		"""		
 		# creates copy of current object which will have the new
 		# coordinates
 		obj=Pluto() # empty pluto object
