@@ -29,7 +29,7 @@ will plot the 107th snapshot, performing regridding if necessary.
         
     pylab.clf()
     #pylab.imshow(numpy.log10(p.rho),extent=[p.x1[0],p.x1[-1],p.x2[0],p.x2[-1]], *arg, **args)
-    pylab.pcolormesh(p.X, p.Y, log10(p.rho.T), *arg, **args)
+    pylab.pcolormesh(obj.X, obj.Y, log10(obj.rho.T), *arg, **args)
 
     if lim is not None:
         pylab.xlim(0,2*lim)
