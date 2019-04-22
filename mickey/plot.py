@@ -40,7 +40,7 @@ will plot the 107th snapshot, performing regridding if necessary.
     pylab.axes().set_aspect('equal')
     cbar=pylab.colorbar()
     cbar.set_label("$\log \\rho$")
-    pylab.title('$t= $'+str( round(obj.t/(2.*numpy.pi),2) ) + ", $\\rho_{\\rm max}$ = " + str(round(p.rho.max(),2)) )
+    pylab.title('$t= $'+str( round(obj.t/(2.*numpy.pi),2) ) + ", $\\rho_{\\rm max}$ = " + str(round(obj.rho.max(),2)) )
     
     # black hole
     if bh is not None:
