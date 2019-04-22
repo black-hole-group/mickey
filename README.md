@@ -64,18 +64,22 @@ Add the above lines to your `.bash_profile` (MacOS) or `.bashrc` (Linux) file fo
 
 ## C extensions
 
-Mickey includes a couple of C extensions for speeding up some array operations which are too slow in Python (e.g. changing the coordinate basis of an array). They are located at `./src`. When running the setup commands above, the C extensions should be automatically compiled. If you want to compile them yourself, just change to the `src` directory and issue
+Mickey includes a couple of C extensions for speeding up some array operations which are too slow in Python (e.g. changing the coordinate basis of an array). They are located at `./src`. When running the setup commands above, the C extensions should be automatically compiled with the PGI compiler (`pgcc`). 
+
+If you want to compile them yourself, just change to the `src` directory and issue
 
     make
 
-There is a flag in the makefile that lets you choose between using CPU or GPU, `CPUFLAGS`. Let it commented out if you want to use the GPU.
+By default, mickey will compile with GPU support enabled for
+a NVIDIA GPU. If you want to disable the GPU, please use
 
-Note that you need the PGI compiler to use the C-extensions.
+    make CPU=1
+(it does not really matter what comes after the `=` above).
 
 ---
 **NOTE**
 
-GPUs can speed up regridding by a factor of 100 compared to CPU w/ pure Python (`regrid`), and 5-10x compared to CPU w/ C.
+GPUs can speed up regridding by a factor of 100 compared to CPU w/ pure Python (`regrid`), and 5-10x compared to CPU w/ C (`make CPU=1`).
 
 ---
 
