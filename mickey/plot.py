@@ -10,7 +10,7 @@ for convenience.
 :param lim: specify bounding box for plot 
 :param bh: plots circle centered on the origin to illustrate the inner boundary. Can be specified as either a float or a list [float,string] ([radius,color string], e.g. [1,'w'])
 :param file: should we output a graphic file with the plot?
-:param n: number of cartesian grid points per dimension, total number of points = n^2 
+:param n: DEPRECATED, number of cartesian grid points per dimension, total number of points = n^2 
 
 Example:
 
@@ -19,16 +19,17 @@ Example:
 will plot the 107th snapshot, performing regridding if necessary.
     """
     # gets arrays in a cartesian grid, stored in a new object p
-    if hasattr(obj, 'regridded'):
-        p=obj
-    else:
-        if n is None:
-            p=obj.regrid(400)
-        else:
-            p=obj.regrid(n)
+    #if hasattr(obj, 'regridded'):
+    #    p=obj
+    #else:
+    #    if n is None:
+    #        p=obj.regrid(400)
+    #    else:
+    #        p=obj.regrid(n)
         
     pylab.clf()
-    pylab.imshow(numpy.log10(p.rho),extent=[p.x1[0],p.x1[-1],p.x2[0],p.x2[-1]], *arg, **args)
+    #pylab.imshow(numpy.log10(p.rho),extent=[p.x1[0],p.x1[-1],p.x2[0],p.x2[-1]], *arg, **args)
+    pylab.pcolormesh(p.X, p.Y, log10(p.rho.T), *arg, **args)
 
     if lim is not None:
         pylab.xlim(0,2*lim)
