@@ -3,4 +3,3 @@ scipy
 matplotlib>=2.0.2
 nmmn
 pyPLUTO
-pyopencl
