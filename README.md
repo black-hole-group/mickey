@@ -73,14 +73,16 @@ This last method is preferred since it allows for easily updating Mickey to the 
 
 Mickey includes a couple of C extensions for speeding up some array operations which are too slow in Python (e.g. changing the coordinate basis of an array). They are located at `./src`. When running the setup commands above, the C extensions should be automatically compiled with the PGI compiler (`pgcc`). 
 
-If you want to compile them yourself, just change to the `src` directory and issue
+If you want to compile them yourself, 
 
+    cd src
     make
 
 By default, mickey will compile with GPU support enabled for
-a NVIDIA GPU. If you want to disable the GPU, please use
+a NVIDIA GPU. If you want to disable GPU-use, 
 
     make CPU=1
+
 (it does not really matter what comes after the `=` above).
 
 ---
