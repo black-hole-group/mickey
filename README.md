@@ -23,13 +23,13 @@ Python toolkit for analyzing and visualizing magnetohydrodynamic (MHD) simulatio
 
 # Installation
 
-1. Make sure you have `pyPluto` installed (ignore this step if you already installed it):
+(1) Make sure you have `pyPluto` installed (ignore this step if you already installed it):
 
 ```shell 
 git clone git@github.com:black-hole-group/pyPLUTO.git
 ```
 
-2. Install [`nmmn`](https://github.com/rsnemmen/nmmn) (ignore this step if you already installed it)
+(2) Install [`nmmn`](https://github.com/rsnemmen/nmmn) (ignore this step if you already installed it)
 
 ```shell
 pip install nmmn
@@ -37,7 +37,7 @@ pip install nmmn
 
 Keep in mind that `nmmn` and `Mickey` are being continuously updated. To get their bleeding-edge versions, it is recommended to install using the `python setup.py develop` method, `cd` to the directory where the packages are located and issue a `git pull`. 
 
-3. Setup environment variables for Pluto and the python scripts, to make sure that they will be found when needed
+(3) Setup environment variables for Pluto and the python scripts, to make sure that they will be found when needed
 
 ```shell
 export PLUTO_DIR=/home/user/pluto
@@ -46,16 +46,16 @@ export PYTHONPATH=/home/user/pyPLUTO:/home/user/mickey/src:$PYTHONPATH
 
 Add the above lines to your `.bash_profile` (MacOS) or `.bashrc` (Linux) file for convenience.
 
-4. *OPTIONAL* Install the [PGI compilers](https://www.pgroup.com). GPU acceleration is only supported in Linux.
+(4) *OPTIONAL* Install the [PGI compilers](https://www.pgroup.com). GPU acceleration is only supported in Linux.
 
-5. *OPTIONAL* Install SWIG.
+(5) *OPTIONAL* Install SWIG.
 
 ```shell
 sudo apt install swig # installs system-wide
 conda install swig # installs for anaconda distro
 ```
 
-6. Install `Mickey`,
+(6) Install `Mickey`,
 
 ```shell
 git clone git@github.com:rsnemmen/mickey.git
