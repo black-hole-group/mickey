@@ -1,8 +1,6 @@
 Mickey: Python scripts to tame Pluto
 =======================================
 
-![](http://www.queen-of-theme-party-games.com/images/mickey-mouse-party-ideas-21678345.gif) 
-
 Assorted methods and classes to handle and visualize the output of the [Pluto MHD code](https://github.com/black-hole-group/pluto).
 
 # Requirements
@@ -14,19 +12,21 @@ Assorted methods and classes to handle and visualize the output of the [Pluto MH
 
 # Installation
 
-1.. Make sure you have `pyPluto` installed (ignore this step if you already installed it):
+1. Make sure you have `pyPluto` installed (ignore this step if you already installed it):
 
 ```shell 
 git clone git@github.com:black-hole-group/pyPLUTO.git
 ```
 
-2.. Install [`nmmn`](https://github.com/rsnemmen/nmmn) (ignore this step if you already installed it)
+2. Install [`nmmn`](https://github.com/rsnemmen/nmmn) (ignore this step if you already installed it)
 
-    pip install nmmn
+```shell
+pip install nmmn
+```
 
 Keep in mind that `nmmn` and `Mickey` are being continuously updated. To get their bleeding-edge versions, it is recommended to install using the `python setup.py develop` method, `cd` to the directory where the packages are located and issue a `git pull`. 
 
-3.. Setup environment variables for Pluto and the python scripts, to make sure that they will be found when needed
+3. Setup environment variables for Pluto and the python scripts, to make sure that they will be found when needed
 
 ```shell
 export PLUTO_DIR=/home/user/pluto
@@ -35,19 +35,19 @@ export PYTHONPATH=/home/user/pyPLUTO:/home/user/mickey/src:$PYTHONPATH
 
 Add the above lines to your `.bash_profile` (MacOS) or `.bashrc` (Linux) file for convenience.
 
-4.. *OPTIONAL* Install the [PGI compilers](https://www.pgroup.com). GPU acceleration is only supported in Linux.
+4. *OPTIONAL* Install the [PGI compilers](https://www.pgroup.com). GPU acceleration is only supported in Linux.
 
-5.. *OPTIONAL* Install SWIG.
+5. *OPTIONAL* Install SWIG.
 
 ```shell
 sudo apt install swig # installs system-wide
 conda install swig # installs for anaconda distro
 ```
 
-6.. Install `Mickey`,
+6. Install `Mickey`,
 
 ```shell
-git clone git@bitbucket.org:nemmen/mickey.git
+git clone git@github.com:rsnemmen/mickey.git
 cd mickey
 ```
 
@@ -95,8 +95,21 @@ GPUs can speed up regridding by a factor of 100 compared to CPU w/ pure Python (
 
 
 # Usage
-	
-Please see the jupyter notebook `mickey-tutorial.ipynb` which has several examples on how to use Mickey.
+
+## Quick Start
+
+```python
+from mickey import Pluto
+import pyPLUTO as pp
+
+# Load Pluto simulation data
+p = Pluto('/path/to/pluto/data')
+
+# Visualize density
+p.plotVar('density')
+```
+
+For more detailed examples, please see the jupyter notebook `mickey-tutorial.ipynb`.
 
 
 # Branch explanation
@@ -108,16 +121,15 @@ Please see the jupyter notebook `mickey-tutorial.ipynb` which has several exampl
 - `openacc`: fast and furious regridding. NVIDIA GPU recommended for max speed
 - `swig`: C-extensions for faster regridding, incorporated through `SWIG`. Serial code
 - `openmp`: C-extensions for optimization, SWIG interface, OpenMP acceleration. Very similar to branch `swig`
-- `opencl`: ~~by far the fastest optimization,~~ incorporated using C and `PyOpenCL`
+- `opencl`: incorporated using C and `PyOpenCL`
+
+# License
+
+Mickey is released under the MIT License. See [LICENSE](LICENSE) file for details.
 
 # TODO
 
-- [x] compute total mass in volume
-- [x] compute Mdot for a given radius
-- [ ] compute energy, 
-- [x] a.m. 
+- [ ] compute energy
 - [ ] compute how much mass was lost from the volume due to outflows
-- [x] script to mirror local files to `alphacrucis`, for easy compilation
-- [x] write a CPU only version for branch openacc
 - [ ] more examples, put them in a jupyter notebook
 
