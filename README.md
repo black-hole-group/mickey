@@ -1,7 +1,10 @@
 Mickey: Python scripts to tame Pluto
 =======================================
 
-Assorted methods and classes to handle and visualize the output of the [Pluto MHD code](https://github.com/black-hole-group/pluto).
+![Python](https://img.shields.io/badge/python-2.7%2F3.x-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+Python toolkit for analyzing and visualizing magnetohydrodynamic (MHD) simulations from the [Pluto code](https://github.com/black-hole-group/pluto). Provides coordinate transformations (regridding), mass/energy/angular momentum calculations, and GPU-accelerated array operations.
 
 # Requirements
 
@@ -9,6 +12,14 @@ Assorted methods and classes to handle and visualize the output of the [Pluto MH
 - [`nmmn`](https://github.com/rsnemmen/nmmn): supporting python modules for scientific analysis.
 - [OPTIONAL] [PGI compiler](https://www.pgroup.com) (`pgcc`) compiler to make use of GPU or CPU acceleration for fast array handling. Only required for changing coordinate basis (i.e. regridding; cf. [C extensions](#c-extensions)).
 - [OPTIONAL] SWIG: needed to interface the python modules and fast C routines.
+
+# Features
+
+- **Data Loading**: Read Pluto binary output files via `pyPLUTO`
+- **Visualization**: Plot simulation variables in 1D, 2D, and 3D
+- **Coordinate Transformations**: Fast regridding between coordinate systems (Cartesian ↔ Spherical) with optional GPU acceleration
+- **Physics Analysis**: Compute mass accretion rates, total mass, energy, and angular momentum
+- **Performance**: 100x speedup on NVIDIA GPUs vs pure Python for large arrays
 
 # Installation
 
