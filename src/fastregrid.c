@@ -2,31 +2,19 @@
 
 #pragma acc routine seq
 int search(double xref, int length, double *x) {
-    /* 
-    Returns the index corresponding to the element in array x with
-    value nearest xref. Obtains the difference between the array
-    elements and xref, and finds the minimum.
-    
-    Inspired on https://codereview.stackexchange.com/a/5146/161148
+    /*
+    Returns the index of the element in sorted array x nearest to xref.
+    Uses binary search: O(log N) vs the previous O(N) linear scan.
+    Assumes x is monotonically increasing.
     */
-    int i, minindex;
-    double diff;
-    double minimum;
-
-    // starting values for search
-    minimum = fabs(x[0]-xref); //diff[0];
-    minindex=0;
-
-    // minimum search
-    for (i = 1; i < length; ++i) {
-    	diff=fabs(x[i]-xref);
-        if (minimum > diff) {
-            minimum = diff;
-            minindex=i;
-        }
+    int lo = 0, hi = length - 1;
+    if (xref <= x[0]) return 0;
+    if (xref >= x[hi]) return hi;
+    while (hi - lo > 1) {
+        int mid = (lo + hi) >> 1;
+        if (x[mid] <= xref) lo = mid; else hi = mid;
     }
-
-    return minindex;
+    return (xref - x[lo] <= x[hi] - xref) ? lo : hi;
 }
 
 
@@ -70,9 +58,19 @@ void regrid(int nxnew, double *xnew, int nynew, double *ynew, int n1, double *r,
 			rhonew[nnew]=rho[nref];
 			pnew[nnew]=p[nref];
 
-			// cartesian components of velocity vector 
-			vx[nnew]=v1[nref]*cos(th[jref])-v2[nref]*sin(th[jref]);
-			vy[nnew]=v1[nref]*sin(th[jref])+v2[nref]*cos(th[jref]);			
+			// cartesian components of velocity vector
+			// use cos(thnew)=x/r, sin(thnew)=y/r — avoids trig lookup and
+			// matches the Python reference (which uses thnew, not th[jref])
+			if (rnew > 0.0) {
+				double inv_rnew = 1.0 / rnew;
+				double cth = xnew[i] * inv_rnew;
+				double sth = ynew[j] * inv_rnew;
+				vx[nnew]=v1[nref]*cth - v2[nref]*sth;
+				vy[nnew]=v1[nref]*sth + v2[nref]*cth;
+			} else {
+				vx[nnew]=v1[nref];
+				vy[nnew]=0.0;
+			}
 			vz[nnew]=v3[nref]; // vphi
 		}	
 	} // end acc kernels
