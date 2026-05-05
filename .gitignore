@@ -1,0 +1,18 @@
+# SWIG-generated and compiled C extension artifacts
+src/fastregrid_wrap.c
+src/fastregrid_wrap.o
+src/fastregrid.o
+src/_fastregrid.so
+src/fastregrid.py
+src/numpy.i
+
+# Python build artifacts
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
