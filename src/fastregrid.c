@@ -5,16 +5,17 @@ int search(double xref, int length, double *x) {
     /*
     Returns the index of the element in sorted array x nearest to xref.
     Uses binary search: O(log N) vs the previous O(N) linear scan.
-    Assumes x is monotonically increasing.
+    Handles arrays sorted in either direction (e.g. mickey passes
+    th = pi/2 - x2 which is monotonically decreasing).
     */
     int lo = 0, hi = length - 1;
-    if (xref <= x[0]) return 0;
-    if (xref >= x[hi]) return hi;
+    int ascending = (x[hi] >= x[0]);
     while (hi - lo > 1) {
         int mid = (lo + hi) >> 1;
-        if (x[mid] <= xref) lo = mid; else hi = mid;
+        int go_right = ascending ? (x[mid] <= xref) : (x[mid] >= xref);
+        if (go_right) lo = mid; else hi = mid;
     }
-    return (xref - x[lo] <= x[hi] - xref) ? lo : hi;
+    return (fabs(xref - x[lo]) <= fabs(xref - x[hi])) ? lo : hi;
 }
 
 

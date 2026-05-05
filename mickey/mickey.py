@@ -10,6 +10,25 @@ import matplotlib.pyplot as pylab
 from scipy import ndimage
 import scipy.interpolate
 import nmmn.misc
+from bisect import bisect_left
+
+
+def _nearest_idx(xref, x_list, n):
+	"""O(log N) nearest-index search on a monotonically ascending list.
+
+	Replacement for nmmn.lsd.search inside the regrid hot loop. The
+	original used numpy.abs(x - xref).argmin() — O(N) per call. Caller
+	pre-converts the numpy array to a Python list once (avoids per-call
+	boxing) and reverses it for descending arrays, mapping the index
+	back via (n - 1 - idx).
+	"""
+	idx = bisect_left(x_list, xref)
+	if idx <= 0:
+		return 0
+	if idx >= n:
+		return n - 1
+	# x_list[idx-1] <= xref <= x_list[idx]; both differences are non-negative
+	return idx if x_list[idx] - xref < xref - x_list[idx-1] else idx - 1
 
 
 
@@ -483,14 +502,23 @@ into a uniform grid in the same coordinates.
 		p=rho.copy()
 
 		# *****BOTTLENECK*****
+		# pre-convert axes to ascending Python lists for fast bisect_left
+		# (numpy element access has heavy per-call boxing overhead)
+		n_r, n_th = r.size, th.size
+		r_list = r.tolist() if r[-1] >= r[0] else r[::-1].tolist()
+		r_reversed = r[-1] < r[0]
+		th_list = th.tolist() if th[-1] >= th[0] else th[::-1].tolist()
+		th_reversed = th[-1] < th[0]
 		# goes through new array
 		for i in range(xnew.size):
 			for j in range(ynew.size):
 					if(gmtry == "SPHERICAL"):
 						rnew,thnew=nmmn.misc.cart2pol(xnew[i],ynew[j])
-						# position in old array
-						iref=nmmn.lsd.search(rnew, r)
-						jref=nmmn.lsd.search(thnew, th)
+						# position in old array (binary search, O(log N))
+						iref=_nearest_idx(rnew, r_list, n_r)
+						jref=_nearest_idx(thnew, th_list, n_th)
+						if r_reversed:  iref = n_r - 1 - iref
+						if th_reversed: jref = n_th - 1 - jref
 
 						rho[j,i]=self.rho[iref,jref]
 						p[j,i]=self.p[iref,jref]
